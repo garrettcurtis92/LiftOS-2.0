@@ -88,8 +88,7 @@ struct ProfileTab: View {
     private var exerciseLibrarySection: some View {
         Section {
             NavigationLink {
-                // TODO: ExerciseLibraryView
-                Text("Exercise Library")
+                ExerciseLibraryView()
             } label: {
                 Label("Exercise Library", systemImage: "dumbbell.fill")
             }

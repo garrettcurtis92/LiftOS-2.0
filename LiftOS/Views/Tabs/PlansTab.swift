@@ -5,9 +5,10 @@ struct PlansTab: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \WorkoutPlan.createdAt, order: .reverse) private var plans: [WorkoutPlan]
     @State private var showingNewPlan = false
+    @State private var navigationPath = NavigationPath()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             Group {
                 if plans.isEmpty {
                     emptyState
@@ -25,9 +26,16 @@ struct PlansTab: View {
                     }
                 }
             }
+            .navigationDestination(for: UUID.self) { planID in
+                if let plan = plans.first(where: { $0.id == planID }) {
+                    PlanDetailView(plan: plan)
+                        .navigationDestination(for: UUID.self) { routineID in
+                            routineDestination(id: routineID, plan: plan)
+                        }
+                }
+            }
             .sheet(isPresented: $showingNewPlan) {
-                // TODO: PlanDetailView for creation
-                Text("New Plan")
+                NewPlanSheet()
                     .presentationDetents([.large])
             }
         }
@@ -37,30 +45,24 @@ struct PlansTab: View {
         List {
             ForEach(plans) { plan in
                 NavigationLink(value: plan.id) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text(plan.name)
-                                    .font(.body.weight(.semibold))
-                                if plan.isActive {
-                                    Text("Active")
-                                        .font(.caption2.weight(.medium))
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(.blue.opacity(0.15))
-                                        .foregroundStyle(.blue)
-                                        .clipShape(Capsule())
-                                }
-                            }
-                            Text("\(plan.numberOfWeeks) weeks · \(plan.weeks.flatMap(\.routines).count) routines")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
+                    PlanListRow(plan: plan)
+                }
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button(role: .destructive) {
+                        modelContext.delete(plan)
+                    } label: {
+                        Label("Delete", systemImage: "trash")
                     }
                 }
+                .swipeActions(edge: .leading) {
+                    Button {
+                        setActive(plan)
+                    } label: {
+                        Label(plan.isActive ? "Deactivate" : "Set Active", systemImage: "play.fill")
+                    }
+                    .tint(plan.isActive ? .gray : .green)
+                }
             }
-            .onDelete(perform: deletePlans)
         }
     }
 
@@ -77,10 +79,52 @@ struct PlansTab: View {
         }
     }
 
-    private func deletePlans(at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(plans[index])
+    @ViewBuilder
+    private func routineDestination(id: UUID, plan: WorkoutPlan) -> some View {
+        let allRoutines = plan.weeks.flatMap(\.routines)
+        if let routine = allRoutines.first(where: { $0.id == id }) {
+            RoutineEditorView(routine: routine)
         }
+    }
+
+    private func setActive(_ plan: WorkoutPlan) {
+        let descriptor = FetchDescriptor<WorkoutPlan>(predicate: #Predicate { $0.isActive })
+        let active = (try? modelContext.fetch(descriptor)) ?? []
+        active.forEach { $0.isActive = false }
+        plan.isActive = true
+    }
+}
+
+struct PlanListRow: View {
+    let plan: WorkoutPlan
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Text(plan.name)
+                        .font(.body.weight(.semibold))
+                    if plan.isActive {
+                        Text("Active")
+                            .font(.caption2.weight(.semibold))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(.green.opacity(0.15))
+                            .foregroundStyle(.green)
+                            .clipShape(Capsule())
+                    }
+                }
+                HStack(spacing: 8) {
+                    Label("\(plan.numberOfWeeks)w", systemImage: "calendar")
+                    let routineCount = plan.weeks.flatMap(\.routines).count
+                    Label("\(routineCount) routines", systemImage: "list.bullet")
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .labelStyle(.titleAndIcon)
+            }
+        }
+        .padding(.vertical, 2)
     }
 }
 
