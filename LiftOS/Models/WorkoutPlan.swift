@@ -10,10 +10,15 @@ final class WorkoutPlan {
     var deloadFrequency: Int?
     var deloadPercentage: Double?
     var isActive: Bool
+    var currentWeekNumber: Int
     var createdAt: Date
 
     @Relationship(deleteRule: .cascade, inverse: \PlanWeek.plan)
     var weeks: [PlanWeek]
+
+    var currentWeek: PlanWeek? {
+        weeks.first { $0.weekNumber == currentWeekNumber }
+    }
 
     init(
         name: String,
@@ -30,6 +35,7 @@ final class WorkoutPlan {
         self.deloadFrequency = deloadFrequency
         self.deloadPercentage = deloadPercentage
         self.isActive = isActive
+        self.currentWeekNumber = 1
         self.createdAt = Date()
         self.weeks = []
     }

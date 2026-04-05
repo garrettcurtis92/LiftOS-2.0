@@ -27,6 +27,7 @@ struct HomeTab: View {
                     }
 
                     if let activePlan {
+                        weekIndicator(activePlan)
                         todaysRoutineSection(activePlan)
                     } else {
                         noPlanEmptyState
@@ -60,6 +61,43 @@ struct HomeTab: View {
                 .buttonStyle(.borderedProminent)
             }
         }
+    }
+
+    private func weekIndicator(_ plan: WorkoutPlan) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Week \(plan.currentWeekNumber) of \(plan.numberOfWeeks)")
+                    .font(.subheadline.weight(.semibold))
+                if plan.currentWeek?.isDeloadWeek == true {
+                    Text("Deload Week")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+            }
+            Spacer()
+            if plan.currentWeekNumber < plan.numberOfWeeks {
+                Button {
+                    plan.currentWeekNumber += 1
+                } label: {
+                    Label("Next Week", systemImage: "chevron.right")
+                        .font(.caption.weight(.medium))
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            } else {
+                Button {
+                    plan.currentWeekNumber = 1
+                } label: {
+                    Label("Restart", systemImage: "arrow.counterclockwise")
+                        .font(.caption.weight(.medium))
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
+        }
+        .padding()
+        .background(Color.secondarySystemBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     private func todaysRoutineSection(_ plan: WorkoutPlan) -> some View {
@@ -178,8 +216,8 @@ struct HomeTab: View {
         // Convert Calendar weekday (1=Sun) to our format (1=Mon)
         let adjustedDay = weekday == 1 ? 7 : weekday - 1
 
-        guard let currentWeek = plan.weeks.first(where: { !$0.isDeloadWeek }) else {
-            return plan.weeks.first?.routines.first
+        guard let currentWeek = plan.currentWeek else {
+            return plan.weeks.sorted(by: { $0.weekNumber < $1.weekNumber }).first?.routines.first
         }
 
         return currentWeek.routines.first { $0.dayOfWeek == adjustedDay }

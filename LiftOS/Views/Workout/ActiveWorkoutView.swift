@@ -15,6 +15,7 @@ struct ActiveWorkoutView: View {
     @State private var expandedExerciseID: UUID?
     @State private var restTimerExercise: SessionExercise?
     @State private var restTimerSeconds: Int = 0
+    @Query private var profiles: [UserProfile]
     @State private var showSwapPicker = false
     @State private var exerciseToSwap: SessionExercise?
     @State private var exerciseToRemove: SessionExercise?
@@ -212,15 +213,19 @@ struct ActiveWorkoutView: View {
         return map
     }
 
+    private var defaultRestSeconds: Int {
+        profiles.first?.defaultRestSeconds ?? 120
+    }
+
     private func findRestSeconds(for sessionExercise: SessionExercise) -> Int {
         guard let routine = session.routine,
               let exercise = sessionExercise.exercise else {
-            return 120
+            return defaultRestSeconds
         }
         let match = routine.sortedExercises.first {
             $0.exercise?.id == exercise.id
         }
-        return match?.restSeconds ?? 120
+        return match?.restSeconds ?? defaultRestSeconds
     }
 
     private func removeExercise(_ sessionExercise: SessionExercise) {
@@ -407,63 +412,106 @@ struct SetLogRow: View {
 
     enum Field { case weight, reps }
 
+    @State private var showRPE = false
+
     var body: some View {
-        HStack {
-            // Set number
-            Text("\(sessionSet.setNumber)")
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(sessionSet.isWarmup ? .orange : .primary)
-                .frame(width: 36, alignment: .leading)
-
-            // Previous session
-            Text(previousDisplay ?? "–")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-                .frame(maxWidth: .infinity, alignment: .center)
-
-            // Weight input
-            TextField("0", text: $weightText)
-                .keyboardType(.decimalPad)
-                .multilineTextAlignment(.center)
-                .font(.body.weight(.medium))
-                .frame(width: 72)
-                .padding(.vertical, 6)
-                .background(Color.secondarySystemBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-                .focused($focusedField, equals: .weight)
-                .onChange(of: weightText) { _, newValue in
-                    sessionSet.weight = Double(newValue) ?? 0
+        VStack(spacing: 0) {
+            HStack {
+                // Set number — tap to toggle warmup
+                Button {
+                    sessionSet.isWarmup.toggle()
+                } label: {
+                    Text(sessionSet.isWarmup ? "W" : "\(sessionSet.setNumber)")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(sessionSet.isWarmup ? .orange : .primary)
+                        .frame(width: 36, alignment: .leading)
                 }
-                .onChange(of: focusedField) { oldFocus, newFocus in
-                    if oldFocus == .weight && newFocus != .weight && sessionSet.weight > 0 {
-                        autoFillWeight(sessionSet.weight)
+                .buttonStyle(.plain)
+
+                // Previous session
+                Text(previousDisplay ?? "–")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+
+                // Weight input
+                TextField("0", text: $weightText)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.center)
+                    .font(.body.weight(.medium))
+                    .frame(width: 72)
+                    .padding(.vertical, 6)
+                    .background(Color.secondarySystemBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                    .focused($focusedField, equals: .weight)
+                    .onChange(of: weightText) { _, newValue in
+                        sessionSet.weight = Double(newValue) ?? 0
                     }
-                }
+                    .onChange(of: focusedField) { oldFocus, newFocus in
+                        if oldFocus == .weight && newFocus != .weight && sessionSet.weight > 0 {
+                            autoFillWeight(sessionSet.weight)
+                        }
+                    }
 
-            // Reps input
-            TextField("0", text: $repsText)
-                .keyboardType(.numberPad)
-                .multilineTextAlignment(.center)
-                .font(.body.weight(.medium))
-                .frame(width: 56)
-                .padding(.vertical, 6)
-                .background(Color.secondarySystemBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-                .focused($focusedField, equals: .reps)
-                .onChange(of: repsText) { _, newValue in
-                    sessionSet.reps = Int(newValue) ?? 0
-                }
+                // Reps input
+                TextField("0", text: $repsText)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.center)
+                    .font(.body.weight(.medium))
+                    .frame(width: 56)
+                    .padding(.vertical, 6)
+                    .background(Color.secondarySystemBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                    .focused($focusedField, equals: .reps)
+                    .onChange(of: repsText) { _, newValue in
+                        sessionSet.reps = Int(newValue) ?? 0
+                    }
 
-            // Complete toggle
-            Button {
-                toggleCompletion()
-            } label: {
-                Image(systemName: sessionSet.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
-                    .foregroundStyle(sessionSet.isCompleted ? .green : .secondary)
+                // Complete toggle
+                Button {
+                    toggleCompletion()
+                } label: {
+                    Image(systemName: sessionSet.isCompleted ? "checkmark.circle.fill" : "circle")
+                        .font(.title3)
+                        .foregroundStyle(sessionSet.isCompleted ? .green : .secondary)
+                }
+                .buttonStyle(.borderless)
+                .frame(width: 36)
             }
-            .buttonStyle(.borderless)
-            .frame(width: 36)
+
+            // RPE selector — shown after set is completed
+            if showRPE && sessionSet.isCompleted {
+                HStack(spacing: 6) {
+                    Text("RPE")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    ForEach([6, 7, 8, 9, 10], id: \.self) { value in
+                        Button {
+                            sessionSet.rpe = Double(value)
+                            withAnimation { showRPE = false }
+                        } label: {
+                            Text("\(value)")
+                                .font(.caption.weight(.medium))
+                                .frame(width: 32, height: 28)
+                                .background(sessionSet.rpe == Double(value) ? Color.accentColor : Color.secondarySystemBackground)
+                                .foregroundStyle(sessionSet.rpe == Double(value) ? .white : .primary)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    Spacer()
+                    Button {
+                        withAnimation { showRPE = false }
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.top, 4)
+                .padding(.leading, 36)
+            }
         }
         .padding(.vertical, 4)
         .onAppear {
@@ -488,9 +536,12 @@ struct SetLogRow: View {
     private func toggleCompletion() {
         if sessionSet.isCompleted {
             sessionSet.completedAt = nil
+            sessionSet.rpe = nil
+            showRPE = false
         } else {
             sessionSet.completedAt = Date()
             focusedField = nil
+            withAnimation { showRPE = true }
             onCompleted()
         }
     }

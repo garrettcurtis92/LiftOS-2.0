@@ -3,12 +3,13 @@ import SwiftData
 
 struct WorkoutSummaryView: View {
     @Environment(\.modelContext) private var modelContext
-    let session: WorkoutSession
+    @Bindable var session: WorkoutSession
     let routine: Routine?
     let onDismiss: () -> Void
 
     @State private var showUpdatePrompt = false
     @State private var hasCheckedChanges = false
+    @State private var notesText: String = ""
 
     var body: some View {
         NavigationStack {
@@ -16,6 +17,7 @@ struct WorkoutSummaryView: View {
                 VStack(spacing: 24) {
                     headerSection
                     statsGrid
+                    notesSection
                     exerciseBreakdown
                 }
                 .padding()
@@ -49,6 +51,21 @@ struct WorkoutSummaryView: View {
             }
         }
         .interactiveDismissDisabled()
+    }
+
+    // MARK: - Notes
+
+    private var notesSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Notes")
+                .font(.headline)
+            TextField("How did it go?", text: $notesText, axis: .vertical)
+                .textFieldStyle(.roundedBorder)
+                .lineLimit(2...5)
+                .onChange(of: notesText) { _, newValue in
+                    session.notes = newValue.isEmpty ? nil : newValue
+                }
+        }
     }
 
     // MARK: - Change Detection
