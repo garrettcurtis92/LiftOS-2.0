@@ -24,10 +24,17 @@ struct ExerciseLibraryView: View {
                 if !groupExercises.isEmpty {
                     Section(group.displayName) {
                         ForEach(groupExercises) { exercise in
-                            ExerciseRowView(exercise: exercise)
+                            NavigationLink(value: exercise.id) {
+                                ExerciseRowView(exercise: exercise)
+                            }
                         }
                     }
                 }
+            }
+        }
+        .navigationDestination(for: UUID.self) { exerciseID in
+            if let exercise = exercises.first(where: { $0.id == exerciseID }) {
+                ExerciseProgressView(exercise: exercise)
             }
         }
         .navigationTitle("Exercise Library")

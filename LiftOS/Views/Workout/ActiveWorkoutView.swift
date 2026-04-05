@@ -10,6 +10,7 @@ struct ActiveWorkoutView: View {
     @State private var timer: Timer?
     @State private var showExercisePicker = false
     @State private var showFinishConfirmation = false
+    @State private var showDiscardConfirmation = false
     @State private var showSummary = false
     @State private var expandedExerciseID: UUID?
     @State private var restTimerExercise: SessionExercise?
@@ -24,6 +25,7 @@ struct ActiveWorkoutView: View {
                     ForEach(session.sortedExercises) { sessionExercise in
                         ExerciseLogCard(
                             sessionExercise: sessionExercise,
+                            previousSets: previousSets(for: sessionExercise),
                             isExpanded: expandedExerciseID == sessionExercise.id,
                             onToggle: { toggleExpanded(sessionExercise) },
                             onSetCompleted: { handleSetCompleted(sessionExercise) }
@@ -41,7 +43,7 @@ struct ActiveWorkoutView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button("Cancel", role: .destructive) {
-                    showFinishConfirmation = true
+                    showDiscardConfirmation = true
                 }
             }
         }
@@ -64,7 +66,15 @@ struct ActiveWorkoutView: View {
                 )
             }
         }
-        .confirmationDialog("End Workout?", isPresented: $showFinishConfirmation) {
+        .confirmationDialog("Finish Workout?", isPresented: $showFinishConfirmation) {
+            Button("Finish") { finishWorkout() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            let completed = session.exercises.reduce(0) { $0 + $1.completedSets.count }
+            let total = session.totalSets
+            Text("You've completed \(completed) of \(total) sets. Save this workout?")
+        }
+        .confirmationDialog("End Workout?", isPresented: $showDiscardConfirmation) {
             Button("Discard Workout", role: .destructive) {
                 modelContext.delete(session)
                 dismiss()
@@ -100,7 +110,7 @@ struct ActiveWorkoutView: View {
 
     private var bottomBar: some View {
         Button {
-            finishWorkout()
+            showFinishConfirmation = true
         } label: {
             Text("Finish Workout")
                 .font(.headline)
@@ -140,6 +150,34 @@ struct ActiveWorkoutView: View {
         }
     }
 
+    private func previousSets(for sessionExercise: SessionExercise) -> [Int: String] {
+        guard let exercise = sessionExercise.exercise else { return [:] }
+        let exerciseID = exercise.id
+        let predicate = #Predicate<SessionExercise> {
+            $0.exercise?.id == exerciseID
+        }
+        var descriptor = FetchDescriptor<SessionExercise>(predicate: predicate)
+        descriptor.fetchLimit = 10
+
+        guard let results = try? modelContext.fetch(descriptor) else { return [:] }
+
+        let previous = results
+            .filter { se in
+                guard let completed = se.session?.completedAt else { return false }
+                return completed < session.startedAt
+            }
+            .sorted { ($0.session?.completedAt ?? .distantPast) > ($1.session?.completedAt ?? .distantPast) }
+            .first
+
+        guard let previous else { return [:] }
+
+        var map: [Int: String] = [:]
+        for set in previous.sortedSets where set.isCompleted {
+            map[set.setNumber] = set.displayString
+        }
+        return map
+    }
+
     private func findRestSeconds(for sessionExercise: SessionExercise) -> Int {
         guard let routine = session.routine,
               let exercise = sessionExercise.exercise else {
@@ -162,7 +200,9 @@ struct ActiveWorkoutView: View {
         let start = session.startedAt
         elapsedSeconds = Int(Date().timeIntervalSince(start))
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            elapsedSeconds = Int(Date().timeIntervalSince(start))
+            Task { @MainActor in
+                elapsedSeconds = Int(Date().timeIntervalSince(start))
+            }
         }
     }
 
@@ -186,6 +226,7 @@ struct ActiveWorkoutView: View {
 
 struct ExerciseLogCard: View {
     @Bindable var sessionExercise: SessionExercise
+    let previousSets: [Int: String]
     let isExpanded: Bool
     let onToggle: () -> Void
     let onSetCompleted: () -> Void
@@ -206,6 +247,8 @@ struct ExerciseLogCard: View {
                     ForEach(sessionExercise.sortedSets) { sessionSet in
                         SetLogRow(
                             sessionSet: sessionSet,
+                            allSets: sessionExercise.sortedSets,
+                            previousDisplay: previousSets[sessionSet.setNumber],
                             onCompleted: onSetCompleted
                         )
                     }
@@ -279,6 +322,8 @@ struct ExerciseLogCard: View {
 
 struct SetLogRow: View {
     @Bindable var sessionSet: SessionSet
+    let allSets: [SessionSet]
+    let previousDisplay: String?
     let onCompleted: () -> Void
 
     @State private var weightText: String = ""
@@ -295,8 +340,8 @@ struct SetLogRow: View {
                 .foregroundStyle(sessionSet.isWarmup ? .orange : .primary)
                 .frame(width: 36, alignment: .leading)
 
-            // Previous (placeholder)
-            Text("--")
+            // Previous session
+            Text(previousDisplay ?? "–")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -313,6 +358,11 @@ struct SetLogRow: View {
                 .focused($focusedField, equals: .weight)
                 .onChange(of: weightText) { _, newValue in
                     sessionSet.weight = Double(newValue) ?? 0
+                }
+                .onChange(of: focusedField) { oldFocus, newFocus in
+                    if oldFocus == .weight && newFocus != .weight && sessionSet.weight > 0 {
+                        autoFillWeight(sessionSet.weight)
+                    }
                 }
 
             // Reps input
@@ -344,6 +394,19 @@ struct SetLogRow: View {
         .onAppear {
             weightText = sessionSet.weight > 0 ? formatWeight(sessionSet.weight) : ""
             repsText = sessionSet.reps > 0 ? "\(sessionSet.reps)" : ""
+        }
+        .onChange(of: sessionSet.weight) { _, newWeight in
+            if focusedField != .weight {
+                weightText = newWeight > 0 ? formatWeight(newWeight) : ""
+            }
+        }
+    }
+
+    private func autoFillWeight(_ weight: Double) {
+        for set in allSets where set.setNumber > sessionSet.setNumber {
+            if set.weight == 0 && !set.isCompleted {
+                set.weight = weight
+            }
         }
     }
 

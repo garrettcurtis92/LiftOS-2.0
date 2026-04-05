@@ -14,6 +14,9 @@ struct HomeTab: View {
     private var activeSession: WorkoutSession? { inProgressSessions.first }
 
     @State private var navigateToSession: WorkoutSession?
+    @State private var showStartConfirmation = false
+    @State private var showQuickStartConfirmation = false
+    @State private var pendingRoutine: Routine?
 
     var body: some View {
         NavigationStack {
@@ -92,7 +95,8 @@ struct HomeTab: View {
                         }
 
                         Button {
-                            startWorkout(from: todayRoutine)
+                            pendingRoutine = todayRoutine
+                            showStartConfirmation = true
                         } label: {
                             Text("Start Workout")
                                 .frame(maxWidth: .infinity)
@@ -133,13 +137,29 @@ struct HomeTab: View {
 
     private var quickWorkoutSection: some View {
         Button {
-            startQuickWorkout()
+            showQuickStartConfirmation = true
         } label: {
             Label("Quick Workout", systemImage: "bolt.fill")
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.bordered)
         .controlSize(.large)
+        .confirmationDialog("Start Quick Workout?", isPresented: $showQuickStartConfirmation) {
+            Button("Start") { startQuickWorkout() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will start an empty workout session.")
+        }
+        .confirmationDialog("Start Workout?", isPresented: $showStartConfirmation) {
+            Button("Start") {
+                if let routine = pendingRoutine {
+                    startWorkout(from: routine)
+                }
+            }
+            Button("Cancel", role: .cancel) { pendingRoutine = nil }
+        } message: {
+            Text("Ready to begin \(pendingRoutine?.name ?? "this workout")?")
+        }
     }
 
     private func startWorkout(from routine: Routine) {

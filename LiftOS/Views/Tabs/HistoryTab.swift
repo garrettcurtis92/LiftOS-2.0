@@ -18,6 +18,11 @@ struct HistoryTab: View {
                 }
             }
             .navigationTitle("History")
+            .navigationDestination(for: UUID.self) { sessionID in
+                if let session = sessions.first(where: { $0.id == sessionID }) {
+                    WorkoutDetailView(session: session)
+                }
+            }
         }
     }
 

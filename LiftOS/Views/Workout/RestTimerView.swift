@@ -10,9 +10,8 @@ struct RestTimerView: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.6)
+            Color.black.opacity(0.85)
                 .ignoresSafeArea()
-                .onTapGesture(perform: onDismiss)
 
             VStack(spacing: 24) {
                 Text("Rest Timer")
@@ -25,7 +24,7 @@ struct RestTimerView: View {
 
                 ZStack {
                     Circle()
-                        .stroke(Color.white.opacity(0.2), lineWidth: 8)
+                        .stroke(Color.white.opacity(0.15), lineWidth: 8)
                         .frame(width: 180, height: 180)
 
                     Circle()
@@ -40,17 +39,16 @@ struct RestTimerView: View {
                         .foregroundStyle(.white)
                 }
 
-                HStack(spacing: 32) {
+                HStack(spacing: 16) {
                     Button {
                         seconds = max(0, seconds - 15)
                     } label: {
                         Text("-15s")
-                            .font(.subheadline.weight(.medium))
+                            .font(.subheadline.weight(.semibold))
                             .foregroundStyle(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(.white.opacity(0.2))
-                            .clipShape(Capsule())
+                            .frame(width: 72, height: 40)
+                            .background(Color(.systemGray3))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
 
                     Button {
@@ -60,20 +58,26 @@ struct RestTimerView: View {
                         }
                     } label: {
                         Text("+15s")
-                            .font(.subheadline.weight(.medium))
+                            .font(.subheadline.weight(.semibold))
                             .foregroundStyle(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(.white.opacity(0.2))
-                            .clipShape(Capsule())
+                            .frame(width: 72, height: 40)
+                            .background(Color(.systemGray3))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
                 }
 
-                Button("Skip") {
+                Button {
                     onDismiss()
+                } label: {
+                    Text("Skip")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(Color.accentColor)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
-                .font(.headline)
-                .foregroundStyle(.white.opacity(0.8))
+                .padding(.horizontal, 40)
                 .padding(.top, 4)
             }
             .padding(32)
@@ -100,10 +104,12 @@ struct RestTimerView: View {
 
     private func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            if seconds > 0 {
-                seconds -= 1
-            } else {
-                onDismiss()
+            Task { @MainActor in
+                if seconds > 0 {
+                    seconds -= 1
+                } else {
+                    onDismiss()
+                }
             }
         }
     }
