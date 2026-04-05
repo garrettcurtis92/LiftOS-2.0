@@ -1,8 +1,14 @@
 import SwiftUI
+import SwiftData
 
 struct WorkoutSummaryView: View {
+    @Environment(\.modelContext) private var modelContext
     let session: WorkoutSession
+    let routine: Routine?
     let onDismiss: () -> Void
+
+    @State private var showUpdatePrompt = false
+    @State private var hasCheckedChanges = false
 
     var body: some View {
         NavigationStack {
@@ -18,12 +24,88 @@ struct WorkoutSummaryView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done", action: onDismiss)
-                        .fontWeight(.semibold)
+                    Button("Done") {
+                        if !hasCheckedChanges && routineChanged {
+                            hasCheckedChanges = true
+                            showUpdatePrompt = true
+                        } else {
+                            onDismiss()
+                        }
+                    }
+                    .fontWeight(.semibold)
                 }
+            }
+            .confirmationDialog("Update Routine?", isPresented: $showUpdatePrompt) {
+                Button("Update Routine") {
+                    applyChangesToRoutine()
+                    onDismiss()
+                }
+                Button("Keep as One-Off") {
+                    onDismiss()
+                }
+                Button("Cancel", role: .cancel) { hasCheckedChanges = false }
+            } message: {
+                Text("Your workout had different exercises than the routine. Update the routine to match?")
             }
         }
         .interactiveDismissDisabled()
+    }
+
+    // MARK: - Change Detection
+
+    private var routineChanged: Bool {
+        guard let routine else { return false }
+
+        let routineExerciseIDs = Set(routine.sortedExercises.compactMap { $0.exercise?.id })
+        let sessionExerciseIDs = Set(session.sortedExercises.compactMap { $0.exercise?.id })
+
+        return routineExerciseIDs != sessionExerciseIDs
+    }
+
+    // MARK: - Apply Changes
+
+    private func applyChangesToRoutine() {
+        guard let routine else { return }
+
+        // Remove existing exercises from routine
+        for existing in routine.exercises {
+            modelContext.delete(existing)
+        }
+        routine.exercises.removeAll()
+
+        // Rebuild from session exercises
+        for (index, sessionExercise) in session.sortedExercises.enumerated() {
+            guard let exercise = sessionExercise.exercise else { continue }
+
+            let routineExercise = RoutineExercise(
+                sortOrder: index,
+                restSeconds: 120
+            )
+            routineExercise.exercise = exercise
+            routineExercise.routine = routine
+
+            // Use the session's completed sets as the new targets
+            let completedSets = sessionExercise.sortedSets.filter { $0.isCompleted && !$0.isWarmup }
+            let setsToUse = completedSets.isEmpty ? sessionExercise.sortedSets : completedSets
+
+            for (setIndex, sessionSet) in setsToUse.enumerated() {
+                let routineSet = RoutineSet(
+                    setNumber: setIndex + 1,
+                    targetReps: sessionSet.reps > 0 ? sessionSet.reps : 8,
+                    targetRepRangeMax: nil,
+                    targetWeight: sessionSet.weight > 0 ? sessionSet.weight : nil
+                )
+                routineSet.routineExercise = routineExercise
+                routineExercise.sets.append(routineSet)
+            }
+
+            routine.exercises.append(routineExercise)
+        }
+
+        // Sync to other weeks if this is Week 1
+        if let plan = routine.week?.plan {
+            PlanSyncService.syncExercises(from: routine, across: plan, context: modelContext)
+        }
     }
 
     // MARK: - Header
@@ -154,6 +236,6 @@ struct StatCard: View {
 }
 
 #Preview {
-    WorkoutSummaryView(session: WorkoutSession(isQuickWorkout: true)) {}
+    WorkoutSummaryView(session: WorkoutSession(isQuickWorkout: true), routine: nil) {}
         .modelContainer(.preview)
 }

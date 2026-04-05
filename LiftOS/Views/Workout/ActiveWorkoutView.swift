@@ -15,6 +15,10 @@ struct ActiveWorkoutView: View {
     @State private var expandedExerciseID: UUID?
     @State private var restTimerExercise: SessionExercise?
     @State private var restTimerSeconds: Int = 0
+    @State private var showSwapPicker = false
+    @State private var exerciseToSwap: SessionExercise?
+    @State private var exerciseToRemove: SessionExercise?
+    @State private var showRemoveConfirmation = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -28,7 +32,15 @@ struct ActiveWorkoutView: View {
                             previousSets: previousSets(for: sessionExercise),
                             isExpanded: expandedExerciseID == sessionExercise.id,
                             onToggle: { toggleExpanded(sessionExercise) },
-                            onSetCompleted: { handleSetCompleted(sessionExercise) }
+                            onSetCompleted: { handleSetCompleted(sessionExercise) },
+                            onRemove: {
+                                exerciseToRemove = sessionExercise
+                                showRemoveConfirmation = true
+                            },
+                            onSwap: {
+                                exerciseToSwap = sessionExercise
+                                showSwapPicker = true
+                            }
                         )
                     }
 
@@ -53,9 +65,31 @@ struct ActiveWorkoutView: View {
             }
         }
         .sheet(isPresented: $showSummary) {
-            WorkoutSummaryView(session: session) {
+            WorkoutSummaryView(session: session, routine: session.routine) {
                 dismiss()
             }
+        }
+        .sheet(isPresented: $showSwapPicker) {
+            ExercisePickerView { newExercise in
+                if let target = exerciseToSwap {
+                    swapExercise(target, with: newExercise)
+                }
+                exerciseToSwap = nil
+            }
+        }
+        .confirmationDialog(
+            "Remove \(exerciseToRemove?.exercise?.name ?? "Exercise")?",
+            isPresented: $showRemoveConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Remove", role: .destructive) {
+                if let target = exerciseToRemove {
+                    removeExercise(target)
+                }
+                exerciseToRemove = nil
+            }
+        } message: {
+            Text("This will remove the exercise and all its sets from this workout.")
         }
         .overlay {
             if restTimerSeconds > 0, let exercise = restTimerExercise {
@@ -189,6 +223,27 @@ struct ActiveWorkoutView: View {
         return match?.restSeconds ?? 120
     }
 
+    private func removeExercise(_ sessionExercise: SessionExercise) {
+        session.exercises.removeAll { $0.id == sessionExercise.id }
+        modelContext.delete(sessionExercise)
+        if expandedExerciseID == sessionExercise.id {
+            expandedExerciseID = nil
+        }
+        // Reindex sort orders
+        for (index, ex) in session.sortedExercises.enumerated() {
+            ex.sortOrder = index
+        }
+    }
+
+    private func swapExercise(_ sessionExercise: SessionExercise, with newExercise: Exercise) {
+        sessionExercise.exercise = newExercise
+        // Reset uncompleted sets
+        for set in sessionExercise.sets where !set.isCompleted {
+            set.weight = 0
+            set.reps = 0
+        }
+    }
+
     private func finishWorkout() {
         session.completedAt = Date()
         showSummary = true
@@ -230,6 +285,8 @@ struct ExerciseLogCard: View {
     let isExpanded: Bool
     let onToggle: () -> Void
     let onSetCompleted: () -> Void
+    let onRemove: () -> Void
+    let onSwap: () -> Void
 
     var body: some View {
         GroupBox {
@@ -279,6 +336,24 @@ struct ExerciseLogCard: View {
             }
 
             Spacer()
+
+            Menu {
+                Button {
+                    onSwap()
+                } label: {
+                    Label("Swap Exercise", systemImage: "arrow.triangle.2.circlepath")
+                }
+                Button(role: .destructive) {
+                    onRemove()
+                } label: {
+                    Label("Remove Exercise", systemImage: "trash")
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(8)
+            }
 
             Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                 .font(.caption.weight(.semibold))
