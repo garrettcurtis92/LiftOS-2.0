@@ -10,6 +10,8 @@ struct RoutineEditorView: View {
     @State private var showingDeleteConfirm = false
     @State private var showSyncPrompt = false
     @State private var pendingSyncAction: (() -> Void)? = nil
+    @State private var pendingExercise: Exercise? = nil
+    @State private var showExerciseConfig = false
 
     private var isWeekOne: Bool {
         PlanSyncService.isWeekOne(routine)
@@ -41,7 +43,16 @@ struct RoutineEditorView: View {
         }
         .sheet(isPresented: $showingExercisePicker) {
             ExercisePickerView { exercise in
-                addExercise(exercise)
+                pendingExercise = exercise
+                showExerciseConfig = true
+            }
+        }
+        .sheet(isPresented: $showExerciseConfig) {
+            if let exercise = pendingExercise {
+                ExerciseConfigSheet(exercise: exercise) { sets, repMin, repMax, weight in
+                    addExercise(exercise, sets: sets, repMin: repMin, repMax: repMax, weight: weight)
+                    pendingExercise = nil
+                }
             }
         }
         .confirmationDialog(
@@ -77,7 +88,7 @@ struct RoutineEditorView: View {
         }
     }
 
-    private func addExercise(_ exercise: Exercise) {
+    private func addExercise(_ exercise: Exercise, sets: Int = 3, repMin: Int = 8, repMax: Int? = 12, weight: Double? = nil) {
         let routineExercise = RoutineExercise(
             sortOrder: routine.exercises.count,
             restSeconds: 120
@@ -85,9 +96,13 @@ struct RoutineEditorView: View {
         routineExercise.exercise = exercise
         routineExercise.routine = routine
 
-        // Add 3 default sets
-        for i in 1...3 {
-            let set = RoutineSet(setNumber: i, targetReps: 8, targetRepRangeMax: 12)
+        for i in 1...sets {
+            let set = RoutineSet(
+                setNumber: i,
+                targetReps: repMin,
+                targetRepRangeMax: repMax,
+                targetWeight: weight
+            )
             set.routineExercise = routineExercise
             routineExercise.sets.append(set)
         }
@@ -96,7 +111,7 @@ struct RoutineEditorView: View {
 
         // Week 1 auto-syncs on disappear; other weeks prompt
         if !isWeekOne {
-            pendingSyncAction = {} // changes already applied
+            pendingSyncAction = {}
             showSyncPrompt = true
         }
     }
@@ -293,6 +308,116 @@ struct SetConfigRow: View {
             }
         }
         .padding(.vertical, 2)
+    }
+}
+
+// MARK: - Exercise Config Sheet
+
+struct ExerciseConfigSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let exercise: Exercise
+    let onAdd: (_ sets: Int, _ repMin: Int, _ repMax: Int?, _ weight: Double?) -> Void
+
+    @State private var numberOfSets = 3
+    @State private var repMin = 8
+    @State private var repMax = 12
+    @State private var useRepRange = true
+    @State private var weightText = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    HStack(spacing: 12) {
+                        Image(systemName: exercise.muscleGroup.symbolName)
+                            .foregroundStyle(exercise.muscleGroup.accentColor)
+                            .frame(width: 28)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(exercise.name)
+                                .font(.headline)
+                            Text(exercise.equipmentType.displayName)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+
+                Section("Sets") {
+                    Stepper("**\(numberOfSets)** sets", value: $numberOfSets, in: 1...10)
+                }
+
+                Section {
+                    Toggle("Use rep range", isOn: $useRepRange)
+
+                    HStack {
+                        Text("Min reps")
+                        Spacer()
+                        TextField("8", value: $repMin, format: .number)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 60)
+                            .monospacedDigit()
+                    }
+
+                    if useRepRange {
+                        HStack {
+                            Text("Max reps")
+                            Spacer()
+                            TextField("12", value: $repMax, format: .number)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 60)
+                                .monospacedDigit()
+                        }
+                    }
+                } header: {
+                    Text("Rep Range")
+                } footer: {
+                    if useRepRange {
+                        Text("Each set will target \(repMin)–\(repMax) reps.")
+                    } else {
+                        Text("Each set will target \(repMin) reps.")
+                    }
+                }
+
+                Section {
+                    HStack {
+                        Text("Starting weight")
+                        Spacer()
+                        TextField("Optional", text: $weightText)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 80)
+                            .monospacedDigit()
+                        Text("lbs")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } footer: {
+                    Text("Leave blank to set weight later or let progression fill it in.")
+                }
+            }
+            .navigationTitle("Configure Exercise")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") {
+                        let weight = Double(weightText)
+                        onAdd(
+                            numberOfSets,
+                            repMin,
+                            useRepRange ? repMax : nil,
+                            weight
+                        )
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
     }
 }
 
