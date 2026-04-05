@@ -1,6 +1,11 @@
 import SwiftUI
 import SwiftData
 
+enum PlanNavDestination: Hashable {
+    case plan(UUID)
+    case routine(UUID, planID: UUID)
+}
+
 struct PlansTab: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \WorkoutPlan.createdAt, order: .reverse) private var plans: [WorkoutPlan]
@@ -26,12 +31,16 @@ struct PlansTab: View {
                     }
                 }
             }
-            .navigationDestination(for: UUID.self) { planID in
-                if let plan = plans.first(where: { $0.id == planID }) {
-                    PlanDetailView(plan: plan)
-                        .navigationDestination(for: UUID.self) { routineID in
-                            routineDestination(id: routineID, plan: plan)
-                        }
+            .navigationDestination(for: PlanNavDestination.self) { destination in
+                switch destination {
+                case .plan(let planID):
+                    if let plan = plans.first(where: { $0.id == planID }) {
+                        PlanDetailView(plan: plan)
+                    }
+                case .routine(let routineID, let planID):
+                    if let plan = plans.first(where: { $0.id == planID }) {
+                        routineDestination(id: routineID, plan: plan)
+                    }
                 }
             }
             .sheet(isPresented: $showingNewPlan) {
@@ -44,7 +53,7 @@ struct PlansTab: View {
     private var plansList: some View {
         List {
             ForEach(plans) { plan in
-                NavigationLink(value: plan.id) {
+                NavigationLink(value: PlanNavDestination.plan(plan.id)) {
                     PlanListRow(plan: plan)
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {

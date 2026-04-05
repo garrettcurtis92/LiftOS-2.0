@@ -238,6 +238,12 @@ struct NewRoutineSheet: View {
         )
         routine.week = week
         week.routines.append(routine)
+
+        // Replicate to all other weeks in the plan
+        if let plan = week.plan {
+            PlanSyncService.replicateRoutine(routine, across: plan)
+        }
+
         dismiss()
     }
 }

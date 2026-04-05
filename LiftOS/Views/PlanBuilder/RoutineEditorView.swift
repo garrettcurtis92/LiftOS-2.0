@@ -8,6 +8,12 @@ struct RoutineEditorView: View {
     @State private var showingExercisePicker = false
     @State private var exerciseToDelete: RoutineExercise? = nil
     @State private var showingDeleteConfirm = false
+    @State private var showSyncPrompt = false
+    @State private var pendingSyncAction: (() -> Void)? = nil
+
+    private var isWeekOne: Bool {
+        PlanSyncService.isWeekOne(routine)
+    }
 
     var body: some View {
         List {
@@ -49,6 +55,26 @@ struct RoutineEditorView: View {
                 }
             }
         }
+        .confirmationDialog("Apply to other weeks?", isPresented: $showSyncPrompt) {
+            Button("All weeks") {
+                pendingSyncAction?()
+                syncToOtherWeeks()
+                pendingSyncAction = nil
+            }
+            Button("This week only") {
+                pendingSyncAction?()
+                pendingSyncAction = nil
+            }
+            Button("Cancel", role: .cancel) { pendingSyncAction = nil }
+        } message: {
+            Text("Apply this change to all weeks, or just this week?")
+        }
+        .onDisappear {
+            // When leaving Week 1 editor, auto-sync to all weeks
+            if isWeekOne, let plan = routine.week?.plan {
+                PlanSyncService.syncExercises(from: routine, across: plan, context: modelContext)
+            }
+        }
     }
 
     private func addExercise(_ exercise: Exercise) {
@@ -67,12 +93,28 @@ struct RoutineEditorView: View {
         }
 
         routine.exercises.append(routineExercise)
+
+        // Week 1 auto-syncs on disappear; other weeks prompt
+        if !isWeekOne {
+            pendingSyncAction = {} // changes already applied
+            showSyncPrompt = true
+        }
     }
 
     private func deleteExercise(_ routineExercise: RoutineExercise) {
         routine.exercises.removeAll { $0.id == routineExercise.id }
         modelContext.delete(routineExercise)
         reindexSortOrder()
+
+        if !isWeekOne {
+            pendingSyncAction = {}
+            showSyncPrompt = true
+        }
+    }
+
+    private func syncToOtherWeeks() {
+        guard let plan = routine.week?.plan else { return }
+        PlanSyncService.syncExercises(from: routine, across: plan, context: modelContext)
     }
 
     private func moveExercises(from source: IndexSet, to destination: Int) {

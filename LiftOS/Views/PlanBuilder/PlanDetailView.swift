@@ -92,6 +92,31 @@ struct PlanDetailView: View {
         .sheet(isPresented: $showingEditPlan) {
             EditPlanSheet(plan: plan)
         }
+        .confirmationDialog("Remove Routine", isPresented: $showDeleteScope) {
+            Button("This week only") {
+                if let routine = routineToDelete, let week = routine.week {
+                    week.routines.removeAll { $0.id == routine.id }
+                    modelContext.delete(routine)
+                    routineToDelete = nil
+                }
+            }
+            Button("All weeks", role: .destructive) {
+                if let routine = routineToDelete, let week = routine.week {
+                    PlanSyncService.removeRoutineFromOtherWeeks(
+                        named: routine.name,
+                        excludingWeek: week,
+                        in: plan,
+                        context: modelContext
+                    )
+                    week.routines.removeAll { $0.id == routine.id }
+                    modelContext.delete(routine)
+                    routineToDelete = nil
+                }
+            }
+            Button("Cancel", role: .cancel) { routineToDelete = nil }
+        } message: {
+            Text("Remove \"\(routineToDelete?.name ?? "")\" from this week only, or all weeks?")
+        }
     }
 
     private var weekSelector: some View {
@@ -145,7 +170,7 @@ struct PlanDetailView: View {
             } else {
                 Section("Routines") {
                     ForEach(week.sortedRoutines) { routine in
-                        NavigationLink(value: routine.id) {
+                        NavigationLink(value: PlanNavDestination.routine(routine.id, planID: plan.id)) {
                             RoutineRowView(routine: routine)
                         }
                     }
@@ -178,6 +203,10 @@ struct PlanDetailView: View {
         let week = PlanWeek(weekNumber: nextNumber, isDeloadWeek: isDeload)
         week.plan = plan
         plan.weeks.append(week)
+
+        // Copy routines from Week 1 template
+        PlanSyncService.populateWeekFromTemplate(week, plan: plan)
+
         plan.numberOfWeeks = plan.weeks.count
 
         let newIndex = plan.weeks.sorted { $0.weekNumber < $1.weekNumber }.count - 1
@@ -225,12 +254,28 @@ struct PlanDetailView: View {
         selectedWeekIndex = max(0, selectedWeekIndex - 1)
     }
 
+    @State private var routineToDelete: Routine?
+    @State private var showDeleteScope = false
+
     private func deleteRoutines(from week: PlanWeek, at offsets: IndexSet) {
         let sorted = week.sortedRoutines
         for index in offsets {
             let routine = sorted[index]
-            week.routines.removeAll { $0.id == routine.id }
-            modelContext.delete(routine)
+            if PlanSyncService.isWeekOne(routine) {
+                // Week 1 deletion — remove from all weeks
+                PlanSyncService.removeRoutineFromOtherWeeks(
+                    named: routine.name,
+                    excludingWeek: week,
+                    in: plan,
+                    context: modelContext
+                )
+                week.routines.removeAll { $0.id == routine.id }
+                modelContext.delete(routine)
+            } else {
+                // Other week — ask scope
+                routineToDelete = routine
+                showDeleteScope = true
+            }
         }
     }
 
