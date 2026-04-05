@@ -13,6 +13,8 @@ struct HomeTab: View {
     private var activePlan: WorkoutPlan? { activePlans.first }
     private var activeSession: WorkoutSession? { inProgressSessions.first }
 
+    @State private var navigateToSession: WorkoutSession?
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -32,6 +34,9 @@ struct HomeTab: View {
                 .padding()
             }
             .navigationTitle("Today")
+            .navigationDestination(item: $navigateToSession) { session in
+                ActiveWorkoutView(session: session)
+            }
         }
     }
 
@@ -47,7 +52,7 @@ struct HomeTab: View {
                 }
                 Spacer()
                 Button("Resume") {
-                    // TODO: Present ActiveWorkoutView
+                    navigateToSession = session
                 }
                 .buttonStyle(.borderedProminent)
             }
@@ -87,7 +92,7 @@ struct HomeTab: View {
                         }
 
                         Button {
-                            // TODO: Start workout from routine
+                            startWorkout(from: todayRoutine)
                         } label: {
                             Text("Start Workout")
                                 .frame(maxWidth: .infinity)
@@ -128,13 +133,23 @@ struct HomeTab: View {
 
     private var quickWorkoutSection: some View {
         Button {
-            // TODO: Start quick workout
+            startQuickWorkout()
         } label: {
             Label("Quick Workout", systemImage: "bolt.fill")
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.bordered)
         .controlSize(.large)
+    }
+
+    private func startWorkout(from routine: Routine) {
+        let session = SessionBuilder.createSession(from: routine, context: modelContext)
+        navigateToSession = session
+    }
+
+    private func startQuickWorkout() {
+        let session = SessionBuilder.createQuickSession(context: modelContext)
+        navigateToSession = session
     }
 
     private func todaysRoutine(from plan: WorkoutPlan) -> Routine? {
