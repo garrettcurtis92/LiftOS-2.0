@@ -17,6 +17,8 @@ struct ExerciseLibraryView: View {
         }
     }
 
+    @State private var selectedExercise: Exercise?
+
     var body: some View {
         List {
             ForEach(MuscleGroup.allCases) { group in
@@ -24,18 +26,19 @@ struct ExerciseLibraryView: View {
                 if !groupExercises.isEmpty {
                     Section(group.displayName) {
                         ForEach(groupExercises) { exercise in
-                            NavigationLink(value: exercise.id) {
+                            Button {
+                                selectedExercise = exercise
+                            } label: {
                                 ExerciseRowView(exercise: exercise)
                             }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
             }
         }
-        .navigationDestination(for: UUID.self) { exerciseID in
-            if let exercise = exercises.first(where: { $0.id == exerciseID }) {
-                ExerciseProgressView(exercise: exercise)
-            }
+        .navigationDestination(item: $selectedExercise) { exercise in
+            ExerciseProgressView(exercise: exercise)
         }
         .navigationTitle("Exercise Library")
         .navigationBarTitleDisplayMode(.large)
@@ -52,6 +55,9 @@ struct ExerciseLibraryView: View {
         }
         .sheet(isPresented: $showingNewExercise) {
             NewExerciseSheet()
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(20)
         }
     }
 

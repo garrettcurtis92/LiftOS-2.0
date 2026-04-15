@@ -131,8 +131,8 @@ struct ExerciseProgressView: View {
                                 Text(set.displayString)
                                     .font(.subheadline)
                                 Spacer()
-                                if let rpe = set.rpe {
-                                    Text("RPE \(String(format: "%.0f", rpe))")
+                                if let rir = set.rir {
+                                    Text("RIR \(rir)")
                                         .font(.caption2)
                                         .foregroundStyle(.orange)
                                 }

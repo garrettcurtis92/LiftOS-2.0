@@ -46,6 +46,9 @@ struct RoutineEditorView: View {
                 pendingExercise = exercise
                 showExerciseConfig = true
             }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(20)
         }
         .sheet(isPresented: $showExerciseConfig) {
             if let exercise = pendingExercise {
@@ -53,6 +56,8 @@ struct RoutineEditorView: View {
                     addExercise(exercise, sets: sets, repMin: repMin, repMax: repMax, weight: weight)
                     pendingExercise = nil
                 }
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(20)
             }
         }
         .confirmationDialog(

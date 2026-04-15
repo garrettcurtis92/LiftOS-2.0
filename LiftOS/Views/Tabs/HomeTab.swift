@@ -17,6 +17,8 @@ struct HomeTab: View {
     @State private var showStartConfirmation = false
     @State private var showQuickStartConfirmation = false
     @State private var pendingRoutine: Routine?
+    @State private var startWorkoutTrigger = false
+    @State private var weekAdvanceTrigger = false
 
     var body: some View {
         NavigationStack {
@@ -78,21 +80,25 @@ struct HomeTab: View {
             if plan.currentWeekNumber < plan.numberOfWeeks {
                 Button {
                     plan.currentWeekNumber += 1
+                    weekAdvanceTrigger.toggle()
                 } label: {
                     Label("Next Week", systemImage: "chevron.right")
                         .font(.caption.weight(.medium))
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
+                .sensoryFeedback(.impact(flexibility: .solid, intensity: 0.5), trigger: weekAdvanceTrigger)
             } else {
                 Button {
                     plan.currentWeekNumber = 1
+                    weekAdvanceTrigger.toggle()
                 } label: {
                     Label("Restart", systemImage: "arrow.counterclockwise")
                         .font(.caption.weight(.medium))
                 }
                 .buttonStyle(.bordered)
                 .controlSize(.small)
+                .sensoryFeedback(.impact(flexibility: .solid, intensity: 0.5), trigger: weekAdvanceTrigger)
             }
         }
         .padding()
@@ -135,6 +141,7 @@ struct HomeTab: View {
                         Button {
                             pendingRoutine = todayRoutine
                             showStartConfirmation = true
+                            startWorkoutTrigger.toggle()
                         } label: {
                             Text("Start Workout")
                                 .frame(maxWidth: .infinity)
@@ -142,6 +149,7 @@ struct HomeTab: View {
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
                         .padding(.top, 8)
+                        .sensoryFeedback(.impact(weight: .medium), trigger: startWorkoutTrigger)
                     }
                 }
             } else {
@@ -156,9 +164,11 @@ struct HomeTab: View {
         }
     }
 
+    @State private var emptyStateAppeared = false
+
     private var noPlanEmptyState: some View {
         VStack(spacing: 16) {
-            Image(systemName: "figure.walk")
+            Image(systemName: "figure.strengthtraining.traditional")
                 .font(.system(size: 48))
                 .foregroundStyle(.tertiary)
 
@@ -171,17 +181,26 @@ struct HomeTab: View {
                 .multilineTextAlignment(.center)
         }
         .padding(.vertical, 40)
+        .opacity(emptyStateAppeared ? 1 : 0)
+        .scaleEffect(emptyStateAppeared ? 1 : 0.95)
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.4)) {
+                emptyStateAppeared = true
+            }
+        }
     }
 
     private var quickWorkoutSection: some View {
         Button {
             showQuickStartConfirmation = true
+            startWorkoutTrigger.toggle()
         } label: {
             Label("Quick Workout", systemImage: "bolt.fill")
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.bordered)
         .controlSize(.large)
+        .sensoryFeedback(.impact(weight: .medium), trigger: startWorkoutTrigger)
         .confirmationDialog("Start Quick Workout?", isPresented: $showQuickStartConfirmation) {
             Button("Start") { startQuickWorkout() }
             Button("Cancel", role: .cancel) {}

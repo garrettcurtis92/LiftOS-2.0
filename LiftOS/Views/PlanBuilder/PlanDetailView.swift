@@ -87,10 +87,16 @@ struct PlanDetailView: View {
         .sheet(isPresented: $showingNewRoutine) {
             if let week = selectedWeek {
                 NewRoutineSheet(week: week)
+                    .presentationDetents([.medium])
+                    .presentationDragIndicator(.visible)
+                    .presentationCornerRadius(20)
             }
         }
         .sheet(isPresented: $showingEditPlan) {
             EditPlanSheet(plan: plan)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(20)
         }
         .confirmationDialog("Remove Routine", isPresented: $showDeleteScope) {
             Button("This week only") {

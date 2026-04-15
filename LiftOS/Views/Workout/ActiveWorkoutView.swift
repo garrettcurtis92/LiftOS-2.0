@@ -20,6 +20,9 @@ struct ActiveWorkoutView: View {
     @State private var exerciseToSwap: SessionExercise?
     @State private var exerciseToRemove: SessionExercise?
     @State private var showRemoveConfirmation = false
+    @State private var addExerciseTrigger = false
+    @State private var finishTrigger = false
+    @State private var autoRestTimer = true
 
     var body: some View {
         VStack(spacing: 0) {
@@ -64,11 +67,16 @@ struct ActiveWorkoutView: View {
             ExercisePickerView { exercise in
                 let _ = SessionBuilder.addExercise(exercise, to: session)
             }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(20)
         }
         .sheet(isPresented: $showSummary) {
             WorkoutSummaryView(session: session, routine: session.routine) {
                 dismiss()
             }
+            .presentationDetents([.large])
+            .presentationCornerRadius(20)
         }
         .sheet(isPresented: $showSwapPicker) {
             ExercisePickerView { newExercise in
@@ -77,6 +85,9 @@ struct ActiveWorkoutView: View {
                 }
                 exerciseToSwap = nil
             }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(20)
         }
         .confirmationDialog(
             "Remove \(exerciseToRemove?.exercise?.name ?? "Exercise")?",
@@ -128,13 +139,30 @@ struct ActiveWorkoutView: View {
     // MARK: - Header
 
     private var workoutHeader: some View {
-        VStack(spacing: 4) {
-            Text(session.routine?.name ?? "Quick Workout")
-                .font(.headline)
+        HStack {
+            Spacer()
 
-            Text(formattedElapsed)
-                .font(.system(.title2, design: .monospaced, weight: .medium))
-                .foregroundStyle(.secondary)
+            VStack(spacing: 4) {
+                Text(session.routine?.name ?? "Quick Workout")
+                    .font(.headline)
+
+                Text(formattedElapsed)
+                    .font(.system(.title2, design: .monospaced, weight: .medium))
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Button {
+                autoRestTimer.toggle()
+            } label: {
+                Image(systemName: autoRestTimer ? "timer" : "timer.slash")
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(autoRestTimer ? Color.accentColor : .secondary)
+            }
+            .buttonStyle(.plain)
+            .padding(.trailing, 16)
+            .sensoryFeedback(.selection, trigger: autoRestTimer)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
@@ -146,6 +174,7 @@ struct ActiveWorkoutView: View {
     private var bottomBar: some View {
         Button {
             showFinishConfirmation = true
+            finishTrigger.toggle()
         } label: {
             Text("Finish Workout")
                 .font(.headline)
@@ -154,6 +183,7 @@ struct ActiveWorkoutView: View {
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
         .padding()
+        .sensoryFeedback(.success, trigger: finishTrigger)
     }
 
     // MARK: - Add Exercise
@@ -161,12 +191,14 @@ struct ActiveWorkoutView: View {
     private var addExerciseButton: some View {
         Button {
             showExercisePicker = true
+            addExerciseTrigger.toggle()
         } label: {
             Label("Add Exercise", systemImage: "plus.circle.fill")
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(.bordered)
         .controlSize(.large)
+        .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.5), trigger: addExerciseTrigger)
     }
 
     // MARK: - Actions
@@ -178,6 +210,7 @@ struct ActiveWorkoutView: View {
     }
 
     private func handleSetCompleted(_ sessionExercise: SessionExercise) {
+        guard autoRestTimer else { return }
         let restSeconds = findRestSeconds(for: sessionExercise)
         if restSeconds > 0 {
             restTimerExercise = sessionExercise
@@ -285,6 +318,7 @@ struct ActiveWorkoutView: View {
 // MARK: - Exercise Log Card
 
 struct ExerciseLogCard: View {
+    @Environment(\.modelContext) private var modelContext
     @Bindable var sessionExercise: SessionExercise
     let previousSets: [Int: String]
     let isExpanded: Bool
@@ -293,12 +327,18 @@ struct ExerciseLogCard: View {
     let onRemove: () -> Void
     let onSwap: () -> Void
 
+    @State private var expandTrigger = false
+
     var body: some View {
         GroupBox {
             VStack(spacing: 0) {
                 exerciseHeader
                     .contentShape(Rectangle())
-                    .onTapGesture(perform: onToggle)
+                    .onTapGesture {
+                        expandTrigger.toggle()
+                        onToggle()
+                    }
+                    .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.4), trigger: expandTrigger)
 
                 if isExpanded {
                     Divider()
@@ -311,7 +351,10 @@ struct ExerciseLogCard: View {
                             sessionSet: sessionSet,
                             allSets: sessionExercise.sortedSets,
                             previousDisplay: previousSets[sessionSet.setNumber],
-                            onCompleted: onSetCompleted
+                            onCompleted: onSetCompleted,
+                            onDelete: sessionExercise.sets.count > 1 ? {
+                                deleteSet(sessionSet)
+                            } : nil
                         )
                     }
 
@@ -384,17 +427,32 @@ struct ExerciseLogCard: View {
         .padding(.bottom, 4)
     }
 
+    private func deleteSet(_ sessionSet: SessionSet) {
+        withAnimation(.easeOut(duration: 0.2)) {
+            sessionExercise.sets.removeAll { $0.id == sessionSet.id }
+            modelContext.delete(sessionSet)
+            // Reindex set numbers
+            for (index, set) in sessionExercise.sortedSets.enumerated() {
+                set.setNumber = index + 1
+            }
+        }
+    }
+
+    @State private var addSetTrigger = false
+
     private var addSetButton: some View {
         Button {
             let newSet = SessionSet(setNumber: sessionExercise.sets.count + 1)
             newSet.sessionExercise = sessionExercise
             sessionExercise.sets.append(newSet)
+            addSetTrigger.toggle()
         } label: {
             Label("Add Set", systemImage: "plus")
                 .font(.subheadline)
         }
         .buttonStyle(.borderless)
         .padding(.top, 8)
+        .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.5), trigger: addSetTrigger)
     }
 }
 
@@ -405,6 +463,7 @@ struct SetLogRow: View {
     let allSets: [SessionSet]
     let previousDisplay: String?
     let onCompleted: () -> Void
+    var onDelete: (() -> Void)?
 
     @State private var weightText: String = ""
     @State private var repsText: String = ""
@@ -412,96 +471,148 @@ struct SetLogRow: View {
 
     enum Field { case weight, reps }
 
-    @State private var showRPE = false
+    @State private var showRIR = false
+    @State private var checkmarkScale: CGFloat = 1.0
+    @State private var rowFlash = false
+    @State private var completionTrigger = false
+    @State private var uncheckTrigger = false
+    @State private var swipeOffset: CGFloat = 0
+    @State private var showDeleteButton = false
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                // Set number — tap to toggle warmup
-                Button {
-                    sessionSet.isWarmup.toggle()
-                } label: {
-                    Text(sessionSet.isWarmup ? "W" : "\(sessionSet.setNumber)")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(sessionSet.isWarmup ? .orange : .primary)
-                        .frame(width: 36, alignment: .leading)
-                }
-                .buttonStyle(.plain)
-
-                // Previous session
-                Text(previousDisplay ?? "–")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-
-                // Weight input
-                TextField("0", text: $weightText)
-                    .keyboardType(.decimalPad)
-                    .multilineTextAlignment(.center)
-                    .font(.body.weight(.medium))
-                    .frame(width: 72)
-                    .padding(.vertical, 6)
-                    .background(Color.secondarySystemBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 6))
-                    .focused($focusedField, equals: .weight)
-                    .onChange(of: weightText) { _, newValue in
-                        sessionSet.weight = Double(newValue) ?? 0
+            ZStack(alignment: .trailing) {
+                // Delete button revealed on swipe
+                if onDelete != nil {
+                    Button {
+                        onDelete?()
+                    } label: {
+                        Image(systemName: "trash.fill")
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(.white)
+                            .frame(width: 60, height: 36)
+                            .background(Color.red)
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
                     }
-                    .onChange(of: focusedField) { oldFocus, newFocus in
-                        if oldFocus == .weight && newFocus != .weight && sessionSet.weight > 0 {
-                            autoFillWeight(sessionSet.weight)
+                    .buttonStyle(.plain)
+                    .opacity(showDeleteButton ? 1 : 0)
+                }
+
+                HStack {
+                    // Set number — tap to toggle warmup
+                    Button {
+                        sessionSet.isWarmup.toggle()
+                    } label: {
+                        Text(sessionSet.isWarmup ? "W" : "\(sessionSet.setNumber)")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(sessionSet.isWarmup ? .orange : .primary)
+                            .frame(width: 36, alignment: .leading)
+                    }
+                    .buttonStyle(.plain)
+                    .sensoryFeedback(.selection, trigger: sessionSet.isWarmup)
+
+                    // Previous session
+                    Text(previousDisplay ?? "–")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+
+                    // Weight input
+                    TextField("0", text: $weightText)
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.center)
+                        .font(.body.weight(.medium))
+                        .frame(width: 72)
+                        .padding(.vertical, 6)
+                        .background(Color.secondarySystemBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .focused($focusedField, equals: .weight)
+                        .onChange(of: weightText) { _, newValue in
+                            sessionSet.weight = Double(newValue) ?? 0
                         }
-                    }
+                        .onChange(of: focusedField) { oldFocus, newFocus in
+                            if oldFocus == .weight && newFocus != .weight && sessionSet.weight > 0 {
+                                autoFillWeight(sessionSet.weight)
+                            }
+                        }
 
-                // Reps input
-                TextField("0", text: $repsText)
-                    .keyboardType(.numberPad)
-                    .multilineTextAlignment(.center)
-                    .font(.body.weight(.medium))
-                    .frame(width: 56)
-                    .padding(.vertical, 6)
-                    .background(Color.secondarySystemBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 6))
-                    .focused($focusedField, equals: .reps)
-                    .onChange(of: repsText) { _, newValue in
-                        sessionSet.reps = Int(newValue) ?? 0
-                    }
+                    // Reps input
+                    TextField("0", text: $repsText)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.center)
+                        .font(.body.weight(.medium))
+                        .frame(width: 56)
+                        .padding(.vertical, 6)
+                        .background(Color.secondarySystemBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .focused($focusedField, equals: .reps)
+                        .onChange(of: repsText) { _, newValue in
+                            sessionSet.reps = Int(newValue) ?? 0
+                        }
 
-                // Complete toggle
-                Button {
-                    toggleCompletion()
-                } label: {
-                    Image(systemName: sessionSet.isCompleted ? "checkmark.circle.fill" : "circle")
-                        .font(.title3)
-                        .foregroundStyle(sessionSet.isCompleted ? .green : .secondary)
+                    // Complete toggle
+                    Button {
+                        toggleCompletion()
+                    } label: {
+                        Image(systemName: sessionSet.isCompleted ? "checkmark.circle.fill" : "circle")
+                            .font(.title3)
+                            .foregroundStyle(sessionSet.isCompleted ? .green : .secondary)
+                            .scaleEffect(checkmarkScale)
+                    }
+                    .buttonStyle(.borderless)
+                    .frame(width: 36)
+                    .sensoryFeedback(.success, trigger: completionTrigger)
+                    .sensoryFeedback(.impact(flexibility: .soft), trigger: uncheckTrigger)
                 }
-                .buttonStyle(.borderless)
-                .frame(width: 36)
+                .offset(x: swipeOffset)
+                .background(rowFlash ? Color.green.opacity(0.08) : Color.clear)
+                .gesture(
+                    onDelete != nil ?
+                    DragGesture(minimumDistance: 20)
+                        .onChanged { value in
+                            if value.translation.width < 0 {
+                                swipeOffset = max(value.translation.width, -70)
+                            }
+                        }
+                        .onEnded { value in
+                            withAnimation(.easeOut(duration: 0.2)) {
+                                if value.translation.width < -40 {
+                                    swipeOffset = -70
+                                    showDeleteButton = true
+                                } else {
+                                    swipeOffset = 0
+                                    showDeleteButton = false
+                                }
+                            }
+                        }
+                    : nil
+                )
             }
 
-            // RPE selector — shown after set is completed
-            if showRPE && sessionSet.isCompleted {
+            // RIR selector — shown after set is completed
+            if showRIR && sessionSet.isCompleted {
                 HStack(spacing: 6) {
-                    Text("RPE")
+                    Text("RIR")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
-                    ForEach([6, 7, 8, 9, 10], id: \.self) { value in
+                    ForEach(0...5, id: \.self) { value in
                         Button {
-                            sessionSet.rpe = Double(value)
-                            withAnimation { showRPE = false }
+                            sessionSet.rir = value
+                            withAnimation(.easeOut(duration: 0.2)) { showRIR = false }
                         } label: {
                             Text("\(value)")
                                 .font(.caption.weight(.medium))
                                 .frame(width: 32, height: 28)
-                                .background(sessionSet.rpe == Double(value) ? Color.accentColor : Color.secondarySystemBackground)
-                                .foregroundStyle(sessionSet.rpe == Double(value) ? .white : .primary)
+                                .background(sessionSet.rir == value ? Color.accentColor : Color.secondarySystemBackground)
+                                .foregroundStyle(sessionSet.rir == value ? .white : .primary)
                                 .clipShape(RoundedRectangle(cornerRadius: 6))
                         }
                         .buttonStyle(.plain)
                     }
+                    .sensoryFeedback(.selection, trigger: sessionSet.rir)
                     Spacer()
                     Button {
-                        withAnimation { showRPE = false }
+                        withAnimation(.easeOut(duration: 0.2)) { showRIR = false }
                     } label: {
                         Image(systemName: "xmark")
                             .font(.caption2)
@@ -511,6 +622,7 @@ struct SetLogRow: View {
                 }
                 .padding(.top, 4)
                 .padding(.leading, 36)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
         .padding(.vertical, 4)
@@ -535,13 +647,34 @@ struct SetLogRow: View {
 
     private func toggleCompletion() {
         if sessionSet.isCompleted {
+            // Un-check
             sessionSet.completedAt = nil
-            sessionSet.rpe = nil
-            showRPE = false
+            sessionSet.rir = nil
+            withAnimation(.easeOut(duration: 0.2)) { showRIR = false }
+            uncheckTrigger.toggle()
         } else {
+            // Complete — bounce + flash + haptic
             sessionSet.completedAt = Date()
             focusedField = nil
-            withAnimation { showRPE = true }
+            completionTrigger.toggle()
+
+            // Checkmark scale bounce
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                checkmarkScale = 0.5
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                    checkmarkScale = 1.0
+                }
+            }
+
+            // Row flash
+            withAnimation(.easeIn(duration: 0.1)) { rowFlash = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                withAnimation(.easeOut(duration: 0.3)) { rowFlash = false }
+            }
+
+            withAnimation(.easeOut(duration: 0.25)) { showRIR = true }
             onCompleted()
         }
     }

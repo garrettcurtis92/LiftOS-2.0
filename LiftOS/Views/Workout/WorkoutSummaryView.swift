@@ -10,6 +10,9 @@ struct WorkoutSummaryView: View {
     @State private var showUpdatePrompt = false
     @State private var hasCheckedChanges = false
     @State private var notesText: String = ""
+    @State private var showTrophy = false
+    @State private var showStats = false
+    @State private var showBreakdown = false
 
     var body: some View {
         NavigationStack {
@@ -17,10 +20,26 @@ struct WorkoutSummaryView: View {
                 VStack(spacing: 24) {
                     headerSection
                     statsGrid
+                        .opacity(showStats ? 1 : 0)
+                        .offset(y: showStats ? 0 : 12)
                     notesSection
+                        .opacity(showStats ? 1 : 0)
                     exerciseBreakdown
+                        .opacity(showBreakdown ? 1 : 0)
+                        .offset(y: showBreakdown ? 0 : 16)
                 }
                 .padding()
+            }
+            .onAppear {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.6).delay(0.1)) {
+                    showTrophy = true
+                }
+                withAnimation(.easeOut(duration: 0.4).delay(0.3)) {
+                    showStats = true
+                }
+                withAnimation(.easeOut(duration: 0.4).delay(0.5)) {
+                    showBreakdown = true
+                }
             }
             .navigationTitle("Workout Complete")
             .navigationBarTitleDisplayMode(.inline)
@@ -132,6 +151,8 @@ struct WorkoutSummaryView: View {
             Image(systemName: "trophy.fill")
                 .font(.system(size: 48))
                 .foregroundStyle(.yellow)
+                .scaleEffect(showTrophy ? 1.0 : 0)
+                .opacity(showTrophy ? 1 : 0)
 
             Text(session.routine?.name ?? "Quick Workout")
                 .font(.title2.weight(.bold))

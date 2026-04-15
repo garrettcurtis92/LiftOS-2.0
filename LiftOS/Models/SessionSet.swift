@@ -7,7 +7,7 @@ final class SessionSet {
     var setNumber: Int
     var reps: Int
     var weight: Double
-    var rpe: Double?
+    var rir: Int?
     var isWarmup: Bool
     var isDropSet: Bool
     var completedAt: Date?
@@ -38,7 +38,7 @@ final class SessionSet {
         setNumber: Int,
         reps: Int = 0,
         weight: Double = 0,
-        rpe: Double? = nil,
+        rir: Int? = nil,
         isWarmup: Bool = false,
         isDropSet: Bool = false
     ) {
@@ -46,7 +46,7 @@ final class SessionSet {
         self.setNumber = setNumber
         self.reps = reps
         self.weight = weight
-        self.rpe = rpe
+        self.rir = rir
         self.isWarmup = isWarmup
         self.isDropSet = isDropSet
         self.completedAt = nil

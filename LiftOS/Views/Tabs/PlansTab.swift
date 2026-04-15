@@ -46,6 +46,8 @@ struct PlansTab: View {
             .sheet(isPresented: $showingNewPlan) {
                 NewPlanSheet()
                     .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
+                    .presentationCornerRadius(20)
             }
         }
     }

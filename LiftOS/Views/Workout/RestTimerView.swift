@@ -7,6 +7,10 @@ struct RestTimerView: View {
 
     @State private var timer: Timer?
     @State private var initialSeconds: Int = 0
+    @State private var adjustTrigger = false
+    @State private var timerCompleteTrigger = false
+    @State private var appeared = false
+    @State private var completionFlash = false
 
     var body: some View {
         ZStack {
@@ -29,19 +33,26 @@ struct RestTimerView: View {
 
                     Circle()
                         .trim(from: 0, to: progress)
-                        .stroke(Color.accentColor, style: StrokeStyle(lineWidth: 8, lineCap: .round))
+                        .stroke(
+                            isUrgent ? Color.orange : (completionFlash ? Color.green : Color.accentColor),
+                            style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                        )
                         .frame(width: 180, height: 180)
                         .rotationEffect(.degrees(-90))
                         .animation(.linear(duration: 1), value: seconds)
+                        .shadow(color: (isUrgent ? Color.orange : Color.accentColor).opacity(0.4), radius: 6)
 
                     Text(formattedTime)
                         .font(.system(size: 48, weight: .bold, design: .monospaced))
                         .foregroundStyle(.white)
+                        .scaleEffect(isUrgent ? 1.05 : 1.0)
+                        .animation(.easeInOut(duration: 0.3), value: isUrgent)
                 }
 
                 HStack(spacing: 16) {
                     Button {
                         seconds = max(0, seconds - 15)
+                        adjustTrigger.toggle()
                     } label: {
                         Text("-15s")
                             .font(.subheadline.weight(.semibold))
@@ -56,6 +67,7 @@ struct RestTimerView: View {
                         if seconds > initialSeconds {
                             initialSeconds = seconds
                         }
+                        adjustTrigger.toggle()
                     } label: {
                         Text("+15s")
                             .font(.subheadline.weight(.semibold))
@@ -81,14 +93,25 @@ struct RestTimerView: View {
                 .padding(.top, 4)
             }
             .padding(32)
+            .scaleEffect(appeared ? 1.0 : 0.95)
+            .opacity(appeared ? 1.0 : 0)
+            .sensoryFeedback(.impact(flexibility: .solid, intensity: 0.4), trigger: adjustTrigger)
+            .sensoryFeedback(.warning, trigger: timerCompleteTrigger)
         }
         .onAppear {
             initialSeconds = seconds
             startTimer()
+            withAnimation(.easeOut(duration: 0.25)) {
+                appeared = true
+            }
         }
         .onDisappear {
             timer?.invalidate()
         }
+    }
+
+    private var isUrgent: Bool {
+        seconds > 0 && seconds <= 5
     }
 
     private var progress: CGFloat {
@@ -107,8 +130,13 @@ struct RestTimerView: View {
             Task { @MainActor in
                 if seconds > 0 {
                     seconds -= 1
-                } else {
-                    onDismiss()
+                    if seconds == 0 {
+                        timerCompleteTrigger.toggle()
+                        withAnimation(.easeIn(duration: 0.2)) { completionFlash = true }
+                        // Brief delay before auto-dismiss so haptic + flash are visible
+                        try? await Task.sleep(for: .milliseconds(800))
+                        onDismiss()
+                    }
                 }
             }
         }
