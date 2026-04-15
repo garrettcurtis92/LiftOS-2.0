@@ -31,3 +31,6 @@ Pods/
 # Temporary files
 *.swp
 *~
+
+# Claude Code local settings
+.claude/
