@@ -137,9 +137,12 @@ LiftOS/
 - **Phase 2: Plan Builder** — Plan creation, week management, routine editor, exercise picker with config sheet
 - **Phase 3: Active Workout** — Live session logging, rest timer, workout summary, mid-workout swap/remove
 - **Phase 4: History & Progress** — Workout detail view, PREV column, exercise progress charts with Swift Charts, PRs
-- **Phase 5: Smart Features** — ProgressionEngine wired in, week tracking, RPE input, warmup toggle, workout notes, profile rest timer fallback
+- **Phase 5: Smart Features** — ProgressionEngine wired in, week tracking, RIR input (0–5 scale), warmup toggle, workout notes, profile rest timer fallback
 - **Plan Sync** — Week 1 as template, auto-replicate routines, "All weeks" vs "This week only" prompts
 - **Exercise Config** — Sets/reps/rep range/weight configured when adding exercise to routine
+- **Phase 6: UX Polish** — Haptics across the app, set completion micro-interaction (bounce + flash + RIR slide-in), rest timer polish (entrance animation, last-5s urgency, completion flash), theme system, entrance animations on summary and home, sheet polish (drag indicators, detents, rounded corners), empty state animation
+- **Mid-Workout Controls** — Swipe-to-delete sets, toggle auto-rest-timer from header
+- **Dev Tooling** — ModelContainer auto-recovers from incompatible schema changes during development
 
 ---
 
@@ -327,3 +330,86 @@ Add `.presentationDragIndicator(.visible)` and `.presentationCornerRadius(20)` t
 
 1. Start a workout → **rapidly** complete 5-6 sets in a row by tapping checkmarks quickly
 2. Verify: animations don't stack up, lag, or block input — speed is critical during a real workout
+
+---
+
+## Upcoming Phases
+
+The app is fully functional through Phase 6. Everything below is **optional** and grouped by intent.
+
+---
+
+### Phase 7: Polish the Gaps (~1–2 days)
+
+The missing pieces a real user would notice. Mostly filling holes from the original plan plus small quality-of-life upgrades.
+
+- **Onboarding flow** — first-launch walkthrough: create your first plan or jump into a quick workout
+- **Calendar heatmap on HistoryTab** — GitHub-style activity grid (originally planned as `CalendarHeatmapView`, never built)
+- **Progress Dashboard** — weekly volume chart, muscle group balance, workout streak, total tonnage over time
+- **Rest timer local notifications** — when the app is backgrounded mid-rest, fire a local notification at zero so the user doesn't miss it
+- **Rest timer completion sound** — optional chime (with a mute toggle in Profile)
+- **HistoryTab contextual empty state** — nudge text changes based on whether an active plan exists
+- **ExerciseProgressView loading skeleton** — `.redacted(reason: .placeholder)` while `loadHistory()` fetches
+
+**Files:** New `CalendarHeatmapView.swift`, `ProgressDashboardView.swift`, `OnboardingView.swift`. Modifications to `HistoryTab`, `RestTimerView`, `ActiveWorkoutView`, `ProfileTab`.
+
+---
+
+### Phase 8: App Store Readiness (~1–2 days)
+
+Everything required to ship to TestFlight / the App Store.
+
+- **App Icon** — design and export all required sizes
+- **Launch screen** — SwiftUI launch screen with logo
+- **Versioned schema migrations** — replace the dev-time auto-wipe in `ModelContainer+LiftOS.swift` with a proper `VersionedSchema` + `MigrationPlan` chain so updates don't destroy user data
+- **Privacy manifest** — `PrivacyInfo.xcprivacy` declaring SwiftData usage, no tracking, no third-party SDKs
+- **App Store metadata** — description, keywords, screenshots, preview video, support URL, privacy policy
+- **TestFlight setup** — App Store Connect configuration, build signing, beta testers
+- **Unit tests** — at minimum: `ProgressionEngine`, `SessionBuilder`, `PlanSyncService`
+- **Crash reporting** — Apple's built-in crash reports (or MetricKit) — no third-party dependencies
+- **Accessibility audit** — VoiceOver pass, Dynamic Type at all sizes, Bold Text, Reduce Motion
+
+---
+
+### Phase 9: Power Features (scope varies per feature)
+
+The "what makes people pay" tier. Each is independent — pick based on what you'd use most.
+
+#### High impact for gym use
+- **Apple Watch companion** — log sets from the wrist, haptic rest timer, glanceable "next set" screen. Huge win since you don't want your phone out mid-set.
+- **Rest timer Live Activity / Dynamic Island** — timer visible on lock screen and Dynamic Island without opening the app
+- **Home Screen widget** — today's routine, last workout, current streak
+
+#### Workout quality
+- **Supersets / circuits** — group exercises together with shared rest logic and paired logging
+- **Plate calculator** — visualize which plates to load for the current weight on a barbell
+- **Exercise demo images/videos** — tap an exercise to see form cues; could use Apple's SF Symbols + custom exercise illustrations
+- **Drop sets & AMRAP logic** — first-class support beyond the current `isDropSet` field
+- **Exercise notes per-session** — in addition to workout-level notes
+
+#### Data & sync
+- **iCloud sync (CloudKit)** — SwiftData + CloudKit integration so data follows the user across devices
+- **Export** — JSON/CSV backup, share sheet support
+- **Import from Hevy / MacroFactor** — parse their export format
+
+#### Body tracking
+- **Body measurements** — weight, waist, biceps over time with charts
+- **Progress photos** — side-by-side comparison view
+
+#### Social / motivation
+- **PR notifications** — toast when you hit a new 1RM / volume PR mid-workout
+- **Share a workout** — generate an image of a completed session to share
+- **Weekly summary notification** — Sunday recap of the week's training
+
+---
+
+## Recommended Next Steps
+
+**If shipping to TestFlight soon:** Phase 7 + Phase 8. ~1 week of focused work.
+
+**If using personally before release:** Skip ahead to the power features that matter most for your training. Top picks for solo use:
+1. Apple Watch companion (massive workflow improvement)
+2. Rest timer Live Activity / notifications (never miss the beep)
+3. Progress Dashboard (motivation via visible progress)
+
+**If building a polished product for a broader audience:** Phase 7 → Phase 9 selectively → Phase 8. Don't ship without onboarding or the Progress Dashboard — they're what make first impressions work.
