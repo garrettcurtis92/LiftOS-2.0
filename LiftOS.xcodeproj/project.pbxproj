@@ -44,6 +44,7 @@
 		F43F52B5B7B5CCF2F4B27132 /* HistoryTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA30E4C146596BB30F3F139B /* HistoryTab.swift */; };
 		FCE77007AED08392CD08DC3F /* PlansTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18747EA3D72808E7AB01852 /* PlansTab.swift */; };
 		F00DBABE1111111111111111 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE1111111111111110 /* OnboardingView.swift */; };
+		F00DBABE2222222222222221 /* CalendarHeatmapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE2222222222222220 /* CalendarHeatmapView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -86,6 +87,7 @@
 		F7B53C0D1CEC06EB190031A9 /* LiftOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiftOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FE61A0C7576D95453123AA64 /* LiftOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiftOSApp.swift; sourceTree = "<group>"; };
 		F00DBABE1111111111111110 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		F00DBABE2222222222222220 /* CalendarHeatmapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarHeatmapView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -264,6 +266,7 @@
 		F59D100CB3E93885C03001B6 /* History */ = {
 			isa = PBXGroup;
 			children = (
+				F00DBABE2222222222222220 /* CalendarHeatmapView.swift */,
 				85D78570604902C60FF79BF7 /* ExerciseProgressView.swift */,
 				A0A3DA852039A7FBD1804FB8 /* WorkoutDetailView.swift */,
 			);
@@ -348,6 +351,7 @@
 				5CCFD411B64E501A8609C0F1 /* ModelContainer+LiftOS.swift in Sources */,
 				62DBE72CFF6480CD87A257CD /* NewPlanSheet.swift in Sources */,
 				F00DBABE1111111111111111 /* OnboardingView.swift in Sources */,
+				F00DBABE2222222222222221 /* CalendarHeatmapView.swift in Sources */,
 				B0C8561B8CBA75074FCCA722 /* PlanDetailView.swift in Sources */,
 				C72739AAD6C6ABD2B632044E /* PlanSyncService.swift in Sources */,
 				1140CCFBA4785A495E4E7271 /* PlanWeek.swift in Sources */,

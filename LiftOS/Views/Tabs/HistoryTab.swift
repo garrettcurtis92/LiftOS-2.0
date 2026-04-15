@@ -1,6 +1,10 @@
 import SwiftUI
 import SwiftData
 
+enum HistoryViewMode: String, CaseIterable {
+    case list, calendar
+}
+
 struct HistoryTab: View {
     @Query(
         filter: #Predicate<WorkoutSession> { $0.completedAt != nil },
@@ -8,16 +12,37 @@ struct HistoryTab: View {
         order: .reverse
     ) private var sessions: [WorkoutSession]
 
+    @State private var viewMode: HistoryViewMode = .list
+    @State private var path: [UUID] = []
+
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             Group {
                 if sessions.isEmpty {
                     emptyState
                 } else {
-                    sessionsList
+                    switch viewMode {
+                    case .list:
+                        sessionsList
+                    case .calendar:
+                        CalendarHeatmapView(sessions: sessions) { sessionID in
+                            path.append(sessionID)
+                        }
+                    }
                 }
             }
             .navigationTitle("History")
+            .toolbar {
+                if !sessions.isEmpty {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Picker("View", selection: $viewMode) {
+                            Image(systemName: "list.bullet").tag(HistoryViewMode.list)
+                            Image(systemName: "calendar").tag(HistoryViewMode.calendar)
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                }
+            }
             .navigationDestination(for: UUID.self) { sessionID in
                 if let session = sessions.first(where: { $0.id == sessionID }) {
                     WorkoutDetailView(session: session)
