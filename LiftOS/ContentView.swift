@@ -3,8 +3,10 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @State private var selectedTab: AppTab = .today
     @State private var hasSeededData = false
+    @State private var showOnboarding = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -37,6 +39,24 @@ struct ContentView: View {
                 SeedDataService.seedIfNeeded(context: modelContext)
                 hasSeededData = true
             }
+            if !hasCompletedOnboarding {
+                showOnboarding = true
+            }
+        }
+        .fullScreenCover(isPresented: $showOnboarding) {
+            OnboardingView(
+                onBuildPlan: {
+                    hasCompletedOnboarding = true
+                    selectedTab = .plans
+                    showOnboarding = false
+                },
+                onQuickWorkout: {
+                    hasCompletedOnboarding = true
+                    selectedTab = .today
+                    showOnboarding = false
+                }
+            )
+            .interactiveDismissDisabled()
         }
     }
 }
