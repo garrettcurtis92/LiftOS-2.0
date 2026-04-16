@@ -4,7 +4,10 @@ import AuthenticationServices
 
 struct ProfileTab: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @Query private var profiles: [UserProfile]
+
+    var showDismissButton: Bool = false
 
     private var profile: UserProfile? { profiles.first }
 
@@ -23,6 +26,14 @@ struct ProfileTab: View {
                 aboutSection
             }
             .navigationTitle("Profile")
+            .toolbar {
+                if showDismissButton {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { dismiss() }
+                            .fontWeight(.semibold)
+                    }
+                }
+            }
         }
     }
 

@@ -26,6 +26,7 @@ struct HomeTab: View {
     @State private var startWorkoutTrigger = false
     @State private var weekAdvanceTrigger = false
     @State private var restDayToggleTrigger = false
+    @State private var showProfile = false
 
     @AppStorage("checkedRestDays") private var checkedRestDaysJSON: String = "[]"
 
@@ -50,6 +51,20 @@ struct HomeTab: View {
                 .padding()
             }
             .navigationTitle("Today")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showProfile = true
+                    } label: {
+                        Image(systemName: "person.crop.circle")
+                            .font(.title3)
+                    }
+                    .accessibilityLabel("Profile")
+                }
+            }
+            .sheet(isPresented: $showProfile) {
+                ProfileTab(showDismissButton: true)
+            }
             .navigationDestination(item: $navigateToSession) { session in
                 ActiveWorkoutView(session: session)
             }

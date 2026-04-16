@@ -11,6 +11,7 @@ struct PlansTab: View {
     @Query(sort: \WorkoutPlan.createdAt, order: .reverse) private var plans: [WorkoutPlan]
     @State private var showingNewPlan = false
     @State private var navigationPath = NavigationPath()
+    @State private var showProfile = false
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -23,13 +24,21 @@ struct PlansTab: View {
             }
             .navigationTitle("Plans")
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showingNewPlan = true
-                    } label: {
-                        Image(systemName: "plus")
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack(spacing: 16) {
+                        Button { showProfile = true } label: {
+                            Image(systemName: "person.crop.circle")
+                                .font(.title3)
+                        }
+                        .accessibilityLabel("Profile")
+                        Button { showingNewPlan = true } label: {
+                            Image(systemName: "plus")
+                        }
                     }
                 }
+            }
+            .sheet(isPresented: $showProfile) {
+                ProfileTab(showDismissButton: true)
             }
             .navigationDestination(for: PlanNavDestination.self) { destination in
                 switch destination {

@@ -15,6 +15,12 @@ struct ContentView: View {
                     Label("Today", systemImage: "figure.run")
                 }
                 .tag(AppTab.today)
+            
+            ProgressTab()
+                .tabItem {
+                    Label("Progress", systemImage: "chart.xyaxis.line")
+                }
+                .tag(AppTab.progress)
 
             PlansTab()
                 .tabItem {
@@ -27,12 +33,6 @@ struct ContentView: View {
                     Label("History", systemImage: "clock.arrow.circlepath")
                 }
                 .tag(AppTab.history)
-
-            ProfileTab()
-                .tabItem {
-                    Label("Profile", systemImage: "person.crop.circle")
-                }
-                .tag(AppTab.profile)
         }
         .task {
             if !hasSeededData {
@@ -62,10 +62,10 @@ struct ContentView: View {
 }
 
 enum AppTab: Hashable {
+    case progress
     case today
     case plans
     case history
-    case profile
 }
 
 #Preview {

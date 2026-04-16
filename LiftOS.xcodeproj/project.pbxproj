@@ -13,6 +13,7 @@
 		1A7DDD69D888F83CC8E07995 /* PreviewSampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D006E880EE4D78FF3F50E0EC /* PreviewSampleData.swift */; };
 		25350BB9BAAEACD40F65390D /* ProfileTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3544319FF3BBF430B22F18F /* ProfileTab.swift */; };
 		258AC32E13673165270AFC4C /* SessionSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB5D2440CC927D3AEFFAC666 /* SessionSet.swift */; };
+		278A483F2F90617000C5CEC3 /* exercises.json in Resources */ = {isa = PBXBuildFile; fileRef = 278A483E2F90617000C5CEC3 /* exercises.json */; };
 		2B28D5E2627FBA9AF6CB512E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2CFECD4E813033A9073B51B /* Theme.swift */; };
 		2FD0AE59C5C2503DE6BC2174 /* RoutineExercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32EBA37AC60E9D3D900B2F2 /* RoutineExercise.swift */; };
 		3020E298DDBE8473DF4A3C06 /* HomeTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C10D0DEA4EFFF0C859AB558 /* HomeTab.swift */; };
@@ -40,11 +41,13 @@
 		E28DACB5BD888B431B22DB28 /* Exercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CA98E226D8C3A6B236DB833 /* Exercise.swift */; };
 		E2FD6D713E1F2CACDBFC51DE /* ExerciseLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB106DD795A442CE2C6A0844 /* ExerciseLibraryView.swift */; };
 		E70085DF4D967860C5FAD259 /* SeedDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3725033CC2F4FDB2E9728731 /* SeedDataService.swift */; };
+		F00DBABE1111111111111111 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE1111111111111110 /* OnboardingView.swift */; };
+		F00DBABE2222222222222221 /* CalendarHeatmapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE2222222222222220 /* CalendarHeatmapView.swift */; };
 		F2D663ACDCC239F85F93F1E6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0945FC4A39A2F29980BC1D1B /* Assets.xcassets */; };
 		F43F52B5B7B5CCF2F4B27132 /* HistoryTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA30E4C146596BB30F3F139B /* HistoryTab.swift */; };
 		FCE77007AED08392CD08DC3F /* PlansTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18747EA3D72808E7AB01852 /* PlansTab.swift */; };
-		F00DBABE1111111111111111 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE1111111111111110 /* OnboardingView.swift */; };
-		F00DBABE2222222222222221 /* CalendarHeatmapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE2222222222222220 /* CalendarHeatmapView.swift */; };
+		F00DBABE3333333333333331 /* ProgressTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE3333333333333330 /* ProgressTab.swift */; };
+		F00DBABE4444444444444441 /* ProgressCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE4444444444444440 /* ProgressCalculator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +57,7 @@
 		19D2BCB508327C146D9967F6 /* ActiveWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveWorkoutView.swift; sourceTree = "<group>"; };
 		257419616EA5C28ED05BCF90 /* WorkoutPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutPlan.swift; sourceTree = "<group>"; };
 		25956B1BB7B7E75F3E1E3027 /* WorkoutSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSummaryView.swift; sourceTree = "<group>"; };
+		278A483E2F90617000C5CEC3 /* exercises.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = exercises.json; sourceTree = "<group>"; };
 		2B44498D749343EAE93C8E56 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		2BFD8780AEBA632E8DF7AFE2 /* PlanWeek.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanWeek.swift; sourceTree = "<group>"; };
 		3725033CC2F4FDB2E9728731 /* SeedDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedDataService.swift; sourceTree = "<group>"; };
@@ -84,10 +88,12 @@
 		DD979065B66BF33AD86903AA /* RoutineEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoutineEditorView.swift; sourceTree = "<group>"; };
 		E18747EA3D72808E7AB01852 /* PlansTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlansTab.swift; sourceTree = "<group>"; };
 		E535FC8B221A26742DB444D8 /* RestTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestTimerView.swift; sourceTree = "<group>"; };
-		F7B53C0D1CEC06EB190031A9 /* LiftOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiftOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		FE61A0C7576D95453123AA64 /* LiftOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiftOSApp.swift; sourceTree = "<group>"; };
 		F00DBABE1111111111111110 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		F00DBABE2222222222222220 /* CalendarHeatmapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarHeatmapView.swift; sourceTree = "<group>"; };
+		F7B53C0D1CEC06EB190031A9 /* LiftOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiftOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FE61A0C7576D95453123AA64 /* LiftOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiftOSApp.swift; sourceTree = "<group>"; };
+		F00DBABE3333333333333330 /* ProgressTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressTab.swift; sourceTree = "<group>"; };
+		F00DBABE4444444444444440 /* ProgressCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressCalculator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -111,6 +117,7 @@
 			isa = PBXGroup;
 			children = (
 				8A271CA5637B0E38BE62E0EC /* PlanSyncService.swift */,
+				F00DBABE4444444444444440 /* ProgressCalculator.swift */,
 				5318049FF0E3C2383A6208C9 /* ProgressionEngine.swift */,
 				3725033CC2F4FDB2E9728731 /* SeedDataService.swift */,
 				CDBC2CB356ECD7937FAD5451 /* SessionBuilder.swift */,
@@ -154,6 +161,7 @@
 		36974FF09F0158F18BD142F7 /* LiftOS */ = {
 			isa = PBXGroup;
 			children = (
+				278A483E2F90617000C5CEC3 /* exercises.json */,
 				0945FC4A39A2F29980BC1D1B /* Assets.xcassets */,
 				013C9BD58C161C857268477B /* ContentView.swift */,
 				47773A1E36D80FDFF603804A /* LiftOS.entitlements */,
@@ -215,6 +223,7 @@
 				5C10D0DEA4EFFF0C859AB558 /* HomeTab.swift */,
 				E18747EA3D72808E7AB01852 /* PlansTab.swift */,
 				A3544319FF3BBF430B22F18F /* ProfileTab.swift */,
+				F00DBABE3333333333333330 /* ProgressTab.swift */,
 			);
 			path = Tabs;
 			sourceTree = "<group>";
@@ -328,6 +337,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F2D663ACDCC239F85F93F1E6 /* Assets.xcassets in Resources */,
+				278A483F2F90617000C5CEC3 /* exercises.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -352,6 +362,8 @@
 				62DBE72CFF6480CD87A257CD /* NewPlanSheet.swift in Sources */,
 				F00DBABE1111111111111111 /* OnboardingView.swift in Sources */,
 				F00DBABE2222222222222221 /* CalendarHeatmapView.swift in Sources */,
+				F00DBABE3333333333333331 /* ProgressTab.swift in Sources */,
+				F00DBABE4444444444444441 /* ProgressCalculator.swift in Sources */,
 				B0C8561B8CBA75074FCCA722 /* PlanDetailView.swift in Sources */,
 				C72739AAD6C6ABD2B632044E /* PlanSyncService.swift in Sources */,
 				1140CCFBA4785A495E4E7271 /* PlanWeek.swift in Sources */,
