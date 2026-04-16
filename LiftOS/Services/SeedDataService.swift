@@ -4,19 +4,22 @@ import SwiftData
 struct SeedDataService {
     @MainActor
     static func seedIfNeeded(context: ModelContext) {
-        var descriptor = FetchDescriptor<Exercise>()
-        descriptor.fetchLimit = 1
-        let existingCount = (try? context.fetchCount(descriptor)) ?? 0
+        let bundled = loadExercisesFromBundle()
+        guard !bundled.isEmpty else { return }
 
-        if existingCount == 0 {
-            seedExercises(context: context)
+        let existing = (try? context.fetch(FetchDescriptor<Exercise>())) ?? []
+        let existingNames = Set(existing.map { $0.name.lowercased() })
+
+        var inserted = 0
+        for exercise in bundled {
+            if !existingNames.contains(exercise.name.lowercased()) {
+                context.insert(exercise)
+                inserted += 1
+            }
         }
-    }
 
-    @MainActor
-    private static func seedExercises(context: ModelContext) {
-        for exercise in loadExercisesFromBundle() {
-            context.insert(exercise)
+        if inserted > 0 {
+            try? context.save()
         }
     }
 
