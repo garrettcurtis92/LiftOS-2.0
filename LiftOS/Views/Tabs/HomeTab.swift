@@ -25,6 +25,9 @@ struct HomeTab: View {
     @State private var pendingRoutine: Routine?
     @State private var startWorkoutTrigger = false
     @State private var weekAdvanceTrigger = false
+    @State private var restDayToggleTrigger = false
+
+    @AppStorage("checkedRestDays") private var checkedRestDaysJSON: String = "[]"
 
     var body: some View {
         NavigationStack {
@@ -136,6 +139,7 @@ struct HomeTab: View {
             .background(Color.secondarySystemBackground)
             .clipShape(RoundedRectangle(cornerRadius: LiftTheme.cornerRadius))
         }
+        .sensoryFeedback(.selection, trigger: restDayToggleTrigger)
     }
 
     @ViewBuilder
@@ -144,6 +148,8 @@ struct HomeTab: View {
         let isToday = (dayOfWeek == currentDayOfWeek)
         let isPast = dayOfWeek < currentDayOfWeek
         let completed = routine.flatMap { completedSessionThisWeek(for: $0) }
+        let rowDate = date(forDayOfWeek: dayOfWeek)
+        let restChecked = routine == nil && isRestDayChecked(rowDate)
 
         HStack(spacing: 0) {
             Text(dayAbbreviation(for: dayOfWeek))
@@ -162,14 +168,20 @@ struct HomeTab: View {
                 routine: routine,
                 isToday: isToday,
                 isPast: isPast,
-                completed: completed
+                completed: completed,
+                restChecked: restChecked
             )
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
         .contentShape(Rectangle())
         .onTapGesture {
-            handleWeekDayTap(routine: routine, isToday: isToday, completed: completed)
+            handleWeekDayTap(
+                routine: routine,
+                isToday: isToday,
+                completed: completed,
+                rowDate: rowDate
+            )
         }
     }
 
@@ -178,12 +190,14 @@ struct HomeTab: View {
         routine: Routine?,
         isToday: Bool,
         isPast: Bool,
-        completed: WorkoutSession?
+        completed: WorkoutSession?,
+        restChecked: Bool
     ) -> some View {
         if routine == nil {
-            Text("Rest")
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.tertiary)
+            Image(systemName: restChecked ? "checkmark.circle.fill" : "circle")
+                .font(.title3)
+                .foregroundStyle(restChecked ? LiftTheme.success : Color.secondary.opacity(0.4))
+                .contentTransition(.symbolEffect(.replace))
         } else if completed != nil {
             Image(systemName: "checkmark.circle.fill")
                 .font(.title3)
@@ -204,16 +218,69 @@ struct HomeTab: View {
         }
     }
 
-    private func handleWeekDayTap(routine: Routine?, isToday: Bool, completed: WorkoutSession?) {
-        guard let routine else { return }
+    private func handleWeekDayTap(
+        routine: Routine?,
+        isToday: Bool,
+        completed: WorkoutSession?,
+        rowDate: Date
+    ) {
+        if routine == nil {
+            toggleRestDay(rowDate)
+            restDayToggleTrigger.toggle()
+            return
+        }
 
         if let completed {
             navigateToDetail = completed
-        } else {
+        } else if let routine {
             pendingRoutine = routine
             showStartConfirmation = true
             startWorkoutTrigger.toggle()
         }
+    }
+
+    // MARK: - Rest-day persistence
+
+    private func isRestDayChecked(_ date: Date) -> Bool {
+        checkedRestDaysSet.contains(dateKey(for: date))
+    }
+
+    private func toggleRestDay(_ date: Date) {
+        var set = checkedRestDaysSet
+        let key = dateKey(for: date)
+        if set.contains(key) {
+            set.remove(key)
+        } else {
+            set.insert(key)
+        }
+        if let data = try? JSONEncoder().encode(Array(set).sorted()),
+           let json = String(data: data, encoding: .utf8) {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                checkedRestDaysJSON = json
+            }
+        }
+    }
+
+    private var checkedRestDaysSet: Set<String> {
+        guard let data = checkedRestDaysJSON.data(using: .utf8),
+              let arr = try? JSONDecoder().decode([String].self, from: data) else {
+            return []
+        }
+        return Set(arr)
+    }
+
+    private func dateKey(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.calendar = Calendar(identifier: .gregorian)
+        return formatter.string(from: date)
+    }
+
+    private func date(forDayOfWeek dayOfWeek: Int) -> Date {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let diff = dayOfWeek - currentDayOfWeek
+        return calendar.date(byAdding: .day, value: diff, to: today) ?? today
     }
 
     private func routineForWeek(plan: WorkoutPlan, dayOfWeek: Int) -> Routine? {
