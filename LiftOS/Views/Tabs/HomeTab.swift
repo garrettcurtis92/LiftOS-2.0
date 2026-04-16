@@ -9,11 +9,17 @@ struct HomeTab: View {
         sort: \WorkoutSession.startedAt,
         order: .reverse
     ) private var inProgressSessions: [WorkoutSession]
+    @Query(
+        filter: #Predicate<WorkoutSession> { $0.completedAt != nil },
+        sort: \WorkoutSession.startedAt,
+        order: .reverse
+    ) private var completedSessions: [WorkoutSession]
 
     private var activePlan: WorkoutPlan? { activePlans.first }
     private var activeSession: WorkoutSession? { inProgressSessions.first }
 
     @State private var navigateToSession: WorkoutSession?
+    @State private var navigateToDetail: WorkoutSession?
     @State private var showStartConfirmation = false
     @State private var showQuickStartConfirmation = false
     @State private var pendingRoutine: Routine?
@@ -30,6 +36,7 @@ struct HomeTab: View {
 
                     if let activePlan {
                         weekIndicator(activePlan)
+                        weekOverviewSection(activePlan)
                         todaysRoutineSection(activePlan)
                     } else {
                         noPlanEmptyState
@@ -42,6 +49,9 @@ struct HomeTab: View {
             .navigationTitle("Today")
             .navigationDestination(item: $navigateToSession) { session in
                 ActiveWorkoutView(session: session)
+            }
+            .navigationDestination(item: $navigateToDetail) { session in
+                WorkoutDetailView(session: session)
             }
         }
     }
@@ -105,6 +115,134 @@ struct HomeTab: View {
         .background(Color.secondarySystemBackground)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
+
+    // MARK: - Week Overview
+
+    private func weekOverviewSection(_ plan: WorkoutPlan) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("This Week")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+
+            VStack(spacing: 0) {
+                ForEach(1...7, id: \.self) { dayOfWeek in
+                    weekDayRow(for: dayOfWeek, plan: plan)
+                    if dayOfWeek < 7 {
+                        Divider()
+                            .padding(.leading, 60)
+                    }
+                }
+            }
+            .background(Color.secondarySystemBackground)
+            .clipShape(RoundedRectangle(cornerRadius: LiftTheme.cornerRadius))
+        }
+    }
+
+    @ViewBuilder
+    private func weekDayRow(for dayOfWeek: Int, plan: WorkoutPlan) -> some View {
+        let routine = routineForWeek(plan: plan, dayOfWeek: dayOfWeek)
+        let isToday = (dayOfWeek == currentDayOfWeek)
+        let isPast = dayOfWeek < currentDayOfWeek
+        let completed = routine.flatMap { completedSessionThisWeek(for: $0) }
+
+        HStack(spacing: 0) {
+            Text(dayAbbreviation(for: dayOfWeek))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(isToday ? LiftTheme.accent : .secondary)
+                .frame(width: 44, alignment: .leading)
+
+            Text(routine?.name ?? "Rest")
+                .font(.body.weight(isToday ? .semibold : .regular))
+                .foregroundStyle(routine == nil ? .secondary : .primary)
+                .lineLimit(1)
+
+            Spacer(minLength: 8)
+
+            statusIndicator(
+                routine: routine,
+                isToday: isToday,
+                isPast: isPast,
+                completed: completed
+            )
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            handleWeekDayTap(routine: routine, isToday: isToday, completed: completed)
+        }
+    }
+
+    @ViewBuilder
+    private func statusIndicator(
+        routine: Routine?,
+        isToday: Bool,
+        isPast: Bool,
+        completed: WorkoutSession?
+    ) -> some View {
+        if routine == nil {
+            Text("Rest")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.tertiary)
+        } else if completed != nil {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.title3)
+                .foregroundStyle(LiftTheme.success)
+        } else if isToday {
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(LiftTheme.accent)
+                    .frame(width: 8, height: 8)
+                Text("Today")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(LiftTheme.accent)
+            }
+        } else {
+            Image(systemName: "circle")
+                .font(.title3)
+                .foregroundStyle(Color.secondary.opacity(isPast ? 0.5 : 0.3))
+        }
+    }
+
+    private func handleWeekDayTap(routine: Routine?, isToday: Bool, completed: WorkoutSession?) {
+        guard let routine else { return }
+
+        if let completed {
+            navigateToDetail = completed
+        } else {
+            pendingRoutine = routine
+            showStartConfirmation = true
+            startWorkoutTrigger.toggle()
+        }
+    }
+
+    private func routineForWeek(plan: WorkoutPlan, dayOfWeek: Int) -> Routine? {
+        guard let currentWeek = plan.currentWeek else { return nil }
+        return currentWeek.routines.first { $0.dayOfWeek == dayOfWeek }
+    }
+
+    private func completedSessionThisWeek(for routine: Routine) -> WorkoutSession? {
+        let calendar = Calendar.current
+        guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: Date()) else {
+            return nil
+        }
+        return completedSessions.first { session in
+            session.routine?.id == routine.id && weekInterval.contains(session.startedAt)
+        }
+    }
+
+    private var currentDayOfWeek: Int {
+        let weekday = Calendar.current.component(.weekday, from: Date())
+        return weekday == 1 ? 7 : weekday - 1
+    }
+
+    private func dayAbbreviation(for dayOfWeek: Int) -> String {
+        let symbols = Calendar.current.shortWeekdaySymbols
+        let index = dayOfWeek % 7
+        return symbols[index]
+    }
+
+    // MARK: - Today's Routine (existing)
 
     private func todaysRoutineSection(_ plan: WorkoutPlan) -> some View {
         VStack(alignment: .leading, spacing: 12) {
