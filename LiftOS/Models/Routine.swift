@@ -20,10 +20,11 @@ final class Routine {
     }
 
     var dayName: String? {
-        guard let dayOfWeek else { return nil }
-        let formatter = DateFormatter()
-        guard dayOfWeek >= 1, dayOfWeek <= 7 else { return nil }
-        return formatter.weekdaySymbols[dayOfWeek - 1]
+        guard let dayOfWeek, dayOfWeek >= 1, dayOfWeek <= 7 else { return nil }
+        let symbols = DateFormatter().weekdaySymbols ?? []
+        // App convention: 1=Mon, 7=Sun. weekdaySymbols: 0=Sun, 1=Mon, ..., 6=Sat
+        let index = dayOfWeek % 7
+        return symbols[index]
     }
 
     init(name: String, dayOfWeek: Int? = nil, sortOrder: Int = 0) {
