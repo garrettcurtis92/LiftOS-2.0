@@ -213,15 +213,18 @@ struct HomeTab: View {
                 .font(.title3)
                 .foregroundStyle(restChecked ? LiftTheme.success : Color.secondary.opacity(0.4))
                 .contentTransition(.symbolEffect(.replace))
+                .accessibilityLabel(restChecked ? "Rested" : "Rest day, not checked")
         } else if completed != nil {
             Image(systemName: "checkmark.circle.fill")
                 .font(.title3)
                 .foregroundStyle(LiftTheme.success)
+                .accessibilityLabel("Completed")
         } else if isToday {
             HStack(spacing: 6) {
                 Circle()
                     .fill(LiftTheme.accent)
                     .frame(width: 8, height: 8)
+                    .accessibilityHidden(true)
                 Text("Today")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(LiftTheme.accent)
@@ -230,6 +233,7 @@ struct HomeTab: View {
             Image(systemName: "circle")
                 .font(.title3)
                 .foregroundStyle(Color.secondary.opacity(isPast ? 0.5 : 0.3))
+                .accessibilityLabel(isPast ? "Missed" : "Upcoming")
         }
     }
 
@@ -389,7 +393,8 @@ struct HomeTab: View {
     private var noPlanEmptyState: some View {
         VStack(spacing: 16) {
             Image(systemName: "figure.strengthtraining.traditional")
-                .font(.system(size: 48))
+                .font(.title)
+                .imageScale(.large)
                 .foregroundStyle(.tertiary)
 
             Text("No Active Plan")

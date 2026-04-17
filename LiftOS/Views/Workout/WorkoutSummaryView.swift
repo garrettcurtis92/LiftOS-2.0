@@ -13,6 +13,7 @@ struct WorkoutSummaryView: View {
     @State private var showTrophy = false
     @State private var showStats = false
     @State private var showBreakdown = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         NavigationStack {
@@ -21,24 +22,30 @@ struct WorkoutSummaryView: View {
                     headerSection
                     statsGrid
                         .opacity(showStats ? 1 : 0)
-                        .offset(y: showStats ? 0 : 12)
+                        .offset(y: showStats ? 0 : (reduceMotion ? 0 : 12))
                     notesSection
                         .opacity(showStats ? 1 : 0)
                     exerciseBreakdown
                         .opacity(showBreakdown ? 1 : 0)
-                        .offset(y: showBreakdown ? 0 : 16)
+                        .offset(y: showBreakdown ? 0 : (reduceMotion ? 0 : 16))
                 }
                 .padding()
             }
             .onAppear {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.6).delay(0.1)) {
+                if reduceMotion {
                     showTrophy = true
-                }
-                withAnimation(.easeOut(duration: 0.4).delay(0.3)) {
                     showStats = true
-                }
-                withAnimation(.easeOut(duration: 0.4).delay(0.5)) {
                     showBreakdown = true
+                } else {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.6).delay(0.1)) {
+                        showTrophy = true
+                    }
+                    withAnimation(.easeOut(duration: 0.4).delay(0.3)) {
+                        showStats = true
+                    }
+                    withAnimation(.easeOut(duration: 0.4).delay(0.5)) {
+                        showBreakdown = true
+                    }
                 }
             }
             .navigationTitle("Workout Complete")
@@ -149,7 +156,8 @@ struct WorkoutSummaryView: View {
     private var headerSection: some View {
         VStack(spacing: 8) {
             Image(systemName: "trophy.fill")
-                .font(.system(size: 48))
+                .font(.title)
+                .imageScale(.large)
                 .foregroundStyle(.yellow)
                 .scaleEffect(showTrophy ? 1.0 : 0)
                 .opacity(showTrophy ? 1 : 0)

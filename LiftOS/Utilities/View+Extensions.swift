@@ -9,4 +9,12 @@ extension View {
             self
         }
     }
+
+    func animateIfAllowed<V: Equatable>(
+        _ animation: Animation? = .default,
+        value: V,
+        reduceMotion: Bool
+    ) -> some View {
+        self.animation(reduceMotion ? nil : animation, value: value)
+    }
 }

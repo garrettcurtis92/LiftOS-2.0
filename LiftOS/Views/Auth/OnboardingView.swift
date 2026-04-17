@@ -119,16 +119,18 @@ private struct OnboardingPage {
 private struct OnboardingPageView: View {
     let page: OnboardingPage
     @State private var appeared = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: 32) {
             Spacer()
 
             Image(systemName: page.symbol)
-                .font(.system(size: 84, weight: .semibold))
+                .font(.title)
+                .imageScale(.large)
                 .foregroundStyle(LiftTheme.accent)
                 .symbolRenderingMode(.hierarchical)
-                .scaleEffect(appeared ? 1.0 : 0.6)
+                .scaleEffect(appeared ? 1.0 : (reduceMotion ? 1.0 : 0.6))
                 .opacity(appeared ? 1.0 : 0.0)
 
             VStack(spacing: 16) {
@@ -143,15 +145,19 @@ private struct OnboardingPageView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             .opacity(appeared ? 1.0 : 0.0)
-            .offset(y: appeared ? 0 : 16)
+            .offset(y: appeared ? 0 : (reduceMotion ? 0 : 16))
 
             Spacer()
             Spacer()
         }
         .padding(.horizontal, 32)
         .onAppear {
-            withAnimation(.spring(response: 0.55, dampingFraction: 0.72).delay(0.05)) {
+            if reduceMotion {
                 appeared = true
+            } else {
+                withAnimation(.spring(response: 0.55, dampingFraction: 0.72).delay(0.05)) {
+                    appeared = true
+                }
             }
         }
         .onDisappear {

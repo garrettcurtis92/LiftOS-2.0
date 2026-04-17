@@ -34,6 +34,7 @@ struct PlansTab: View {
                         Button { showingNewPlan = true } label: {
                             Image(systemName: "plus")
                         }
+                        .accessibilityLabel("New Plan")
                     }
                 }
             }

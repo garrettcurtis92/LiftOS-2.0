@@ -39,6 +39,7 @@ struct CalendarHeatmapView: View {
             }
             .buttonStyle(.plain)
             .foregroundStyle(LiftTheme.accent)
+            .accessibilityLabel("Previous Month")
 
             Spacer()
 
@@ -60,6 +61,7 @@ struct CalendarHeatmapView: View {
             .buttonStyle(.plain)
             .foregroundStyle(isAtCurrentMonth ? Color.secondary.opacity(0.4) : LiftTheme.accent)
             .disabled(isAtCurrentMonth)
+            .accessibilityLabel("Next Month")
         }
     }
 

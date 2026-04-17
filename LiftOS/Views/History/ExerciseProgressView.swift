@@ -176,7 +176,8 @@ struct ExerciseProgressView: View {
     private var noDataView: some View {
         VStack(spacing: 12) {
             Image(systemName: "chart.line.uptrend.xyaxis")
-                .font(.system(size: 48))
+                .font(.title)
+                .imageScale(.large)
                 .foregroundStyle(.tertiary)
             Text("No data yet")
                 .font(.title3.weight(.medium))
