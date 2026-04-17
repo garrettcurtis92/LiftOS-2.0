@@ -45,10 +45,10 @@
 		F00DBABE2222222222222221 /* CalendarHeatmapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE2222222222222220 /* CalendarHeatmapView.swift */; };
 		F00DBABE3333333333333331 /* ProgressTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE3333333333333330 /* ProgressTab.swift */; };
 		F00DBABE4444444444444441 /* ProgressCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE4444444444444440 /* ProgressCalculator.swift */; };
+		F00DBABE5555555555555551 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F00DBABE5555555555555550 /* PrivacyInfo.xcprivacy */; };
 		F2D663ACDCC239F85F93F1E6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0945FC4A39A2F29980BC1D1B /* Assets.xcassets */; };
 		F43F52B5B7B5CCF2F4B27132 /* HistoryTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA30E4C146596BB30F3F139B /* HistoryTab.swift */; };
 		FCE77007AED08392CD08DC3F /* PlansTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18747EA3D72808E7AB01852 /* PlansTab.swift */; };
-		F00DBABE5555555555555551 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F00DBABE5555555555555550 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,9 +104,9 @@
 		F00DBABE2222222222222220 /* CalendarHeatmapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarHeatmapView.swift; sourceTree = "<group>"; };
 		F00DBABE3333333333333330 /* ProgressTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressTab.swift; sourceTree = "<group>"; };
 		F00DBABE4444444444444440 /* ProgressCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressCalculator.swift; sourceTree = "<group>"; };
+		F00DBABE5555555555555550 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		F7B53C0D1CEC06EB190031A9 /* LiftOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiftOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FE61A0C7576D95453123AA64 /* LiftOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiftOSApp.swift; sourceTree = "<group>"; };
-		F00DBABE5555555555555550 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -184,13 +184,6 @@
 			path = PlanBuilder;
 			sourceTree = "<group>";
 		};
-		35DFDC965878AEA2D10D6A13 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
 		36974FF09F0158F18BD142F7 /* LiftOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -202,10 +195,8 @@
 				F00DBABE5555555555555550 /* PrivacyInfo.xcprivacy */,
 				5F98768BE00BFA36F4293D23 /* Models */,
 				C21D5C3AFEE418245222135C /* Preview Content */,
-				35DFDC965878AEA2D10D6A13 /* Resources */,
 				09DA9F8B57DDDB9859301D9B /* Services */,
 				AB5901D46CA4DD75AC5762F6 /* Utilities */,
-				66BCAD88EE0C852D9F8E6745 /* ViewModels */,
 				72AEFF8135F4E2B9329A0D9A /* Views */,
 			);
 			path = LiftOS;
@@ -226,13 +217,6 @@
 				B3249F3AABE4674BC88EFAA6 /* WorkoutSession.swift */,
 			);
 			path = Models;
-			sourceTree = "<group>";
-		};
-		66BCAD88EE0C852D9F8E6745 /* ViewModels */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ViewModels;
 			sourceTree = "<group>";
 		};
 		72AEFF8135F4E2B9329A0D9A /* Views */ = {
