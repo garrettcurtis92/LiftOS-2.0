@@ -8,6 +8,7 @@ struct ExerciseProgressView: View {
 
     @State private var history: [ExerciseEntry] = []
     @State private var selectedMetric: Metric = .weight
+    @State private var isLoading = true
 
     enum Metric: String, CaseIterable {
         case weight = "Weight"
@@ -18,7 +19,9 @@ struct ExerciseProgressView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                if history.isEmpty {
+                if isLoading {
+                    loadingSkeleton
+                } else if history.isEmpty {
                     noDataView
                 } else {
                     personalRecords
@@ -31,6 +34,30 @@ struct ExerciseProgressView: View {
         .navigationTitle(exercise.name)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { loadHistory() }
+    }
+
+    // MARK: - Loading Skeleton
+
+    private var loadingSkeleton: some View {
+        VStack(spacing: 20) {
+            VStack(alignment: .leading, spacing: 12) {
+                ShimmerRect(width: 160, height: 18)
+                HStack(spacing: 12) {
+                    ShimmerRect(height: 80)
+                    ShimmerRect(height: 80)
+                    ShimmerRect(height: 80)
+                }
+            }
+
+            ShimmerRect(height: 200)
+
+            VStack(alignment: .leading, spacing: 12) {
+                ShimmerRect(width: 80, height: 18)
+                ShimmerRect(height: 72)
+                ShimmerRect(height: 72)
+                ShimmerRect(height: 72)
+            }
+        }
     }
 
     // MARK: - Personal Records
@@ -171,7 +198,10 @@ struct ExerciseProgressView: View {
         var descriptor = FetchDescriptor<SessionExercise>(predicate: predicate)
         descriptor.fetchLimit = 50
 
-        guard let results = try? modelContext.fetch(descriptor) else { return }
+        guard let results = try? modelContext.fetch(descriptor) else {
+            isLoading = false
+            return
+        }
 
         history = results
             .filter { $0.session?.completedAt != nil }
@@ -189,6 +219,7 @@ struct ExerciseProgressView: View {
                     sets: completedSets
                 )
             }
+        isLoading = false
     }
 
     private func metricValue(for entry: ExerciseEntry) -> Double {
@@ -223,6 +254,36 @@ struct ExerciseEntry: Identifiable {
     let estimated1RM: Double?
     let setsCompleted: Int
     let sets: [SessionSet]
+}
+
+private struct ShimmerRect: View {
+    var width: CGFloat? = nil
+    var height: CGFloat = 44
+    @State private var phase: CGFloat = -1
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: LiftTheme.smallCornerRadius)
+            .fill(Color.secondary.opacity(0.15))
+            .overlay(
+                RoundedRectangle(cornerRadius: LiftTheme.smallCornerRadius)
+                    .fill(
+                        LinearGradient(
+                            colors: [.clear, Color.secondary.opacity(0.1), .clear],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .offset(x: phase * 200)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: LiftTheme.smallCornerRadius))
+            .frame(width: width, height: height)
+            .frame(maxWidth: width == nil ? .infinity : nil, alignment: .leading)
+            .onAppear {
+                withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
+                    phase = 1
+                }
+            }
+    }
 }
 
 #Preview {

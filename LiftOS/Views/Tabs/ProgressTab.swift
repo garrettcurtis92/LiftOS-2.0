@@ -153,8 +153,8 @@ struct ProgressTab: View {
 
     private func xAxisStride(for range: ProgressTimeRange) -> Calendar.Component {
         switch range {
-        case .fourWeeks, .threeMonths: return .weekOfYear
-        case .sixMonths, .oneYear: return .month
+        case .fourWeeks: return .weekOfYear
+        case .threeMonths, .sixMonths, .oneYear: return .month
         }
     }
 

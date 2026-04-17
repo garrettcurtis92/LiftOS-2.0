@@ -6,14 +6,18 @@ enum HistoryViewMode: String, CaseIterable {
 }
 
 struct HistoryTab: View {
+    @Environment(\.modelContext) private var modelContext
     @Query(
         filter: #Predicate<WorkoutSession> { $0.completedAt != nil },
         sort: \WorkoutSession.startedAt,
         order: .reverse
     ) private var sessions: [WorkoutSession]
 
+    @Query(filter: #Predicate<WorkoutPlan> { $0.isActive }) private var activePlans: [WorkoutPlan]
+
     @State private var viewMode: HistoryViewMode = .list
     @State private var path: [UUID] = []
+    @State private var sessionToDelete: WorkoutSession?
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -87,7 +91,32 @@ struct HistoryTab: View {
                     }
                     .padding(.vertical, 2)
                 }
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    Button(role: .destructive) {
+                        sessionToDelete = session
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
             }
+        }
+        .confirmationDialog(
+            "Delete Workout?",
+            isPresented: Binding(
+                get: { sessionToDelete != nil },
+                set: { if !$0 { sessionToDelete = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if let session = sessionToDelete {
+                    modelContext.delete(session)
+                    sessionToDelete = nil
+                }
+            }
+            Button("Cancel", role: .cancel) { sessionToDelete = nil }
+        } message: {
+            Text("This will permanently delete this workout and all its data.")
         }
     }
 
@@ -95,7 +124,11 @@ struct HistoryTab: View {
         ContentUnavailableView {
             Label("No Workouts Yet", systemImage: "clock.arrow.circlepath")
         } description: {
-            Text("Your completed workouts will appear here. Start a workout from the Today tab.")
+            if activePlans.first != nil {
+                Text("Start today's workout from the Today tab to build your history.")
+            } else {
+                Text("Create a plan or try a quick workout from the Today tab to get started.")
+            }
         }
     }
 }
