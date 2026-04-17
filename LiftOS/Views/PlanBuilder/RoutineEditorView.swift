@@ -12,6 +12,7 @@ struct RoutineEditorView: View {
     @State private var pendingSyncAction: (() -> Void)? = nil
     @State private var pendingExercise: Exercise? = nil
     @State private var showExerciseConfig = false
+    @State private var showEditRoutine = false
 
     private var isWeekOne: Bool {
         PlanSyncService.isWeekOne(routine)
@@ -39,7 +40,23 @@ struct RoutineEditorView: View {
         .navigationTitle(routine.name)
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
-            EditButton()
+            ToolbarItem(placement: .topBarTrailing) {
+                HStack(spacing: 16) {
+                    Button {
+                        showEditRoutine = true
+                    } label: {
+                        Image(systemName: "pencil.circle")
+                    }
+                    .accessibilityLabel("Edit Routine")
+                    EditButton()
+                }
+            }
+        }
+        .sheet(isPresented: $showEditRoutine) {
+            EditRoutineSheet(routine: routine)
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(20)
         }
         .sheet(isPresented: $showingExercisePicker) {
             ExercisePickerView { exercise in

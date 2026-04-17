@@ -248,6 +248,69 @@ struct NewRoutineSheet: View {
     }
 }
 
+struct EditRoutineSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Bindable var routine: Routine
+
+    @State private var name: String = ""
+    @State private var dayOfWeek: Int? = nil
+
+    private let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Routine Info") {
+                    TextField("e.g. Push Day A, Legs, Upper", text: $name)
+                        .textInputAutocapitalization(.words)
+                }
+
+                Section {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            FilterChip(label: "Unset", isSelected: dayOfWeek == nil) {
+                                dayOfWeek = nil
+                            }
+                            ForEach(Array(days.enumerated()), id: \.offset) { index, day in
+                                FilterChip(label: day, isSelected: dayOfWeek == index + 1) {
+                                    dayOfWeek = dayOfWeek == index + 1 ? nil : index + 1
+                                }
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                } header: {
+                    Text("Day of Week")
+                }
+            }
+            .navigationTitle("Edit Routine")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") { save() }
+                        .fontWeight(.semibold)
+                        .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+            .onAppear {
+                name = routine.name
+                dayOfWeek = routine.dayOfWeek
+            }
+        }
+    }
+
+    private func save() {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        routine.name = trimmed
+        routine.dayOfWeek = dayOfWeek
+        dismiss()
+    }
+}
+
 #Preview {
     NewPlanSheet()
         .modelContainer(.preview)
