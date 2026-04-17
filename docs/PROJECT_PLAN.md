@@ -403,6 +403,22 @@ The "what makes people pay" tier. Each is independent — pick based on what you
 
 ---
 
+### Phase 10: AI Assistant & Social Features (long-term)
+
+These features need careful design and iteration. No rush — build them right.
+
+#### AI Training Assistant
+- **Chat-based plan builder** — conversational interface that generates full workout plans based on goals, available equipment, days per week, and experience level. Powered by Claude API.
+- **Smart exercise substitution** — mid-workout "equipment taken?" button suggests alternatives with the same muscle group and a different equipment type, with reasoning for why
+- **AI-powered deload & volume recommendations** — intelligent suggestions based on training history and fatigue signals
+
+#### Social / Coaching
+- **Plan & routine sharing** — share a full plan or single routine with another user via iOS Share Sheet, link, or QR code
+- **Import shared plans** — recipient taps a shared file or link and LiftOS imports the plan with all weeks, routines, exercises, and sets intact
+- **Coach-to-client workflow** — a coach builds a plan and sends it to a client's LiftOS install
+
+---
+
 ## Recommended Next Steps
 
 **If shipping to TestFlight soon:** Phase 7 + Phase 8. ~1 week of focused work.
