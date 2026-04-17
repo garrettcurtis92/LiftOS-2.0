@@ -42,8 +42,9 @@ struct ProfileTab: View {
                 Image(systemName: "person.crop.circle.fill")
                     .font(.title)
                     .foregroundStyle(.secondary)
-                VStack(alignment: .leading) {
-                    TextField("Display Name", text: displayNameBinding)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(profile?.displayName ?? "Lifter")
                         .font(.headline)
                     if profile?.appleUserID != nil {
                         Text("Signed in with Apple")
@@ -52,6 +53,9 @@ struct ProfileTab: View {
                     }
                 }
             }
+
+            TextField("Enter your name", text: displayNameBinding)
+                .textInputAutocapitalization(.words)
         }
     }
 
