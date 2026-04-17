@@ -58,10 +58,14 @@ struct RoutineEditorView: View {
                 .presentationDragIndicator(.visible)
                 .presentationCornerRadius(20)
         }
-        .sheet(isPresented: $showingExercisePicker) {
+        .sheet(isPresented: $showingExercisePicker, onDismiss: {
+            if pendingExercise != nil {
+                showExerciseConfig = true
+            }
+        }) {
             ExercisePickerView { exercise in
                 pendingExercise = exercise
-                showExerciseConfig = true
+                showingExercisePicker = false
             }
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
