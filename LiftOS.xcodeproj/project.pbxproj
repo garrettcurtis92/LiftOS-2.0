@@ -48,6 +48,7 @@
 		F2D663ACDCC239F85F93F1E6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0945FC4A39A2F29980BC1D1B /* Assets.xcassets */; };
 		F43F52B5B7B5CCF2F4B27132 /* HistoryTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA30E4C146596BB30F3F139B /* HistoryTab.swift */; };
 		FCE77007AED08392CD08DC3F /* PlansTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18747EA3D72808E7AB01852 /* PlansTab.swift */; };
+		F00DBABE5555555555555551 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F00DBABE5555555555555550 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -105,6 +106,7 @@
 		F00DBABE4444444444444440 /* ProgressCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressCalculator.swift; sourceTree = "<group>"; };
 		F7B53C0D1CEC06EB190031A9 /* LiftOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiftOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FE61A0C7576D95453123AA64 /* LiftOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiftOSApp.swift; sourceTree = "<group>"; };
+		F00DBABE5555555555555550 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -197,6 +199,7 @@
 				013C9BD58C161C857268477B /* ContentView.swift */,
 				47773A1E36D80FDFF603804A /* LiftOS.entitlements */,
 				FE61A0C7576D95453123AA64 /* LiftOSApp.swift */,
+				F00DBABE5555555555555550 /* PrivacyInfo.xcprivacy */,
 				5F98768BE00BFA36F4293D23 /* Models */,
 				C21D5C3AFEE418245222135C /* Preview Content */,
 				35DFDC965878AEA2D10D6A13 /* Resources */,
@@ -407,6 +410,7 @@
 			files = (
 				F2D663ACDCC239F85F93F1E6 /* Assets.xcassets in Resources */,
 				278A483F2F90617000C5CEC3 /* exercises.json in Resources */,
+				F00DBABE5555555555555551 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
