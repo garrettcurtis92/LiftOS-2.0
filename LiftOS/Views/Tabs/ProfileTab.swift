@@ -14,9 +14,8 @@ struct ProfileTab: View {
     var body: some View {
         NavigationStack {
             Form {
-                if let profile {
-                    signedInSection(profile)
-                } else {
+                profileSection
+                if profile?.appleUserID == nil {
                     signInSection
                 }
 
@@ -37,16 +36,16 @@ struct ProfileTab: View {
         }
     }
 
-    private func signedInSection(_ profile: UserProfile) -> some View {
+    private var profileSection: some View {
         Section {
             HStack {
                 Image(systemName: "person.crop.circle.fill")
                     .font(.title)
                     .foregroundStyle(.secondary)
                 VStack(alignment: .leading) {
-                    Text(profile.displayName ?? "Lifter")
+                    TextField("Display Name", text: displayNameBinding)
                         .font(.headline)
-                    if profile.appleUserID != nil {
+                    if profile?.appleUserID != nil {
                         Text("Signed in with Apple")
                             .font(.caption)
                             .foregroundStyle(.secondary)
@@ -54,6 +53,16 @@ struct ProfileTab: View {
                 }
             }
         }
+    }
+
+    private var displayNameBinding: Binding<String> {
+        Binding(
+            get: { profile?.displayName ?? "" },
+            set: { newValue in
+                let p = ensureProfile()
+                p.displayName = newValue.isEmpty ? nil : newValue
+            }
+        )
     }
 
     private var signInSection: some View {
