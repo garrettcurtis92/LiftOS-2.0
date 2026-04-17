@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -42,6 +43,8 @@ struct ContentView: View {
             if !hasCompletedOnboarding {
                 showOnboarding = true
             }
+            let center = UNUserNotificationCenter.current()
+            try? await center.requestAuthorization(options: [.alert, .sound])
         }
         .fullScreenCover(isPresented: $showOnboarding) {
             OnboardingView(

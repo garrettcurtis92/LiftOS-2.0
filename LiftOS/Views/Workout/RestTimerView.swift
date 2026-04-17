@@ -1,16 +1,23 @@
 import SwiftUI
+import UserNotifications
+import AudioToolbox
 
 struct RestTimerView: View {
     @Binding var seconds: Int
     let exerciseName: String
     let onDismiss: () -> Void
 
+    @AppStorage("restTimerNotifications") private var notificationsEnabled = true
+    @AppStorage("restTimerSound") private var soundEnabled = true
+
     @State private var timer: Timer?
     @State private var initialSeconds: Int = 0
+    @State private var targetDate: Date = .distantFuture
     @State private var adjustTrigger = false
     @State private var timerCompleteTrigger = false
     @State private var appeared = false
     @State private var completionFlash = false
+    @State private var hasCompleted = false
 
     var body: some View {
         ZStack {
@@ -39,7 +46,7 @@ struct RestTimerView: View {
                         )
                         .frame(width: 180, height: 180)
                         .rotationEffect(.degrees(-90))
-                        .animation(.linear(duration: 1), value: seconds)
+                        .animation(.linear(duration: 0.5), value: seconds)
                         .shadow(color: (isUrgent ? Color.orange : Color.accentColor).opacity(0.4), radius: 6)
 
                     Text(formattedTime)
@@ -52,6 +59,8 @@ struct RestTimerView: View {
                 HStack(spacing: 16) {
                     Button {
                         seconds = max(0, seconds - 15)
+                        targetDate = Date().addingTimeInterval(Double(seconds))
+                        scheduleNotification()
                         adjustTrigger.toggle()
                     } label: {
                         Text("-15s")
@@ -64,9 +73,11 @@ struct RestTimerView: View {
 
                     Button {
                         seconds += 15
+                        targetDate = Date().addingTimeInterval(Double(seconds))
                         if seconds > initialSeconds {
                             initialSeconds = seconds
                         }
+                        scheduleNotification()
                         adjustTrigger.toggle()
                     } label: {
                         Text("+15s")
@@ -79,6 +90,7 @@ struct RestTimerView: View {
                 }
 
                 Button {
+                    cancelNotification()
                     onDismiss()
                 } label: {
                     Text("Skip")
@@ -107,6 +119,7 @@ struct RestTimerView: View {
         }
         .onDisappear {
             timer?.invalidate()
+            cancelNotification()
         }
     }
 
@@ -126,20 +139,50 @@ struct RestTimerView: View {
     }
 
     private func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+        targetDate = Date().addingTimeInterval(Double(seconds))
+        scheduleNotification()
+        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
             Task { @MainActor in
-                if seconds > 0 {
-                    seconds -= 1
-                    if seconds == 0 {
-                        timerCompleteTrigger.toggle()
-                        withAnimation(.easeIn(duration: 0.2)) { completionFlash = true }
-                        // Brief delay before auto-dismiss so haptic + flash are visible
-                        try? await Task.sleep(for: .milliseconds(800))
-                        onDismiss()
-                    }
+                let remaining = Int(ceil(targetDate.timeIntervalSince(Date())))
+                seconds = max(0, remaining)
+                if seconds == 0 && !hasCompleted {
+                    handleCompletion()
                 }
             }
         }
+    }
+
+    private func handleCompletion() {
+        hasCompleted = true
+        timer?.invalidate()
+        cancelNotification()
+        if soundEnabled {
+            AudioServicesPlaySystemSound(1007)
+        }
+        timerCompleteTrigger.toggle()
+        withAnimation(.easeIn(duration: 0.2)) { completionFlash = true }
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(800))
+            onDismiss()
+        }
+    }
+
+    private func scheduleNotification() {
+        cancelNotification()
+        guard notificationsEnabled else { return }
+        let content = UNMutableNotificationContent()
+        content.title = "Rest Complete"
+        content.body = "Time for your next set of \(exerciseName)"
+        content.sound = .default
+        let interval = targetDate.timeIntervalSinceNow
+        guard interval > 0 else { return }
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
+        let request = UNNotificationRequest(identifier: "restTimer", content: content, trigger: trigger)
+        UNUserNotificationCenter.current().add(request)
+    }
+
+    private func cancelNotification() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["restTimer"])
     }
 }
 

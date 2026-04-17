@@ -82,6 +82,9 @@ struct ProfileTab: View {
         }
     }
 
+    @AppStorage("restTimerNotifications") private var notificationsEnabled = true
+    @AppStorage("restTimerSound") private var soundEnabled = true
+
     private var restTimerSection: some View {
         Section("Rest Timer") {
             Picker("Default Rest", selection: restSecondsBinding) {
@@ -93,6 +96,8 @@ struct ProfileTab: View {
                 Text("240s").tag(240)
                 Text("300s").tag(300)
             }
+            Toggle("Notifications", isOn: $notificationsEnabled)
+            Toggle("Completion Sound", isOn: $soundEnabled)
         }
     }
 
