@@ -35,10 +35,25 @@ struct ProgressionEngine {
             return nil
         }
 
+        return computeSuggestion(
+            prevWeight: previousSet.weight,
+            prevReps: previousSet.reps,
+            targetReps: targetReps,
+            targetRepRangeMax: targetRepRangeMax,
+            increment: exercise.equipmentType.weightIncrement,
+            deloadPercentage: deloadPercentage
+        )
+    }
+
+    static func computeSuggestion(
+        prevWeight: Double,
+        prevReps: Int,
+        targetReps: Int,
+        targetRepRangeMax: Int?,
+        increment: Double,
+        deloadPercentage: Double?
+    ) -> ProgressionSuggestion {
         let rangeMax = targetRepRangeMax ?? targetReps
-        let prevWeight = previousSet.weight
-        let prevReps = previousSet.reps
-        let increment = exercise.equipmentType.weightIncrement
 
         if let deloadPercentage {
             let deloadWeight = roundToIncrement(prevWeight * deloadPercentage, increment: increment)
@@ -111,7 +126,7 @@ struct ProgressionEngine {
             .max { $0.volume < $1.volume }
     }
 
-    private static func roundToIncrement(_ value: Double, increment: Double) -> Double {
+    static func roundToIncrement(_ value: Double, increment: Double) -> Double {
         guard increment > 0 else { return value }
         return (value / increment).rounded() * increment
     }

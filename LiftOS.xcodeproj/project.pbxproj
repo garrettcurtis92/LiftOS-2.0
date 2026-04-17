@@ -43,12 +43,22 @@
 		E70085DF4D967860C5FAD259 /* SeedDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3725033CC2F4FDB2E9728731 /* SeedDataService.swift */; };
 		F00DBABE1111111111111111 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE1111111111111110 /* OnboardingView.swift */; };
 		F00DBABE2222222222222221 /* CalendarHeatmapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE2222222222222220 /* CalendarHeatmapView.swift */; };
+		F00DBABE3333333333333331 /* ProgressTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE3333333333333330 /* ProgressTab.swift */; };
+		F00DBABE4444444444444441 /* ProgressCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE4444444444444440 /* ProgressCalculator.swift */; };
 		F2D663ACDCC239F85F93F1E6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0945FC4A39A2F29980BC1D1B /* Assets.xcassets */; };
 		F43F52B5B7B5CCF2F4B27132 /* HistoryTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA30E4C146596BB30F3F139B /* HistoryTab.swift */; };
 		FCE77007AED08392CD08DC3F /* PlansTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18747EA3D72808E7AB01852 /* PlansTab.swift */; };
-		F00DBABE3333333333333331 /* ProgressTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE3333333333333330 /* ProgressTab.swift */; };
-		F00DBABE4444444444444441 /* ProgressCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00DBABE4444444444444440 /* ProgressCalculator.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		275EDDD82F91D067009CDA8F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 06C4B2032CE987EF6CD8C534 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 946C5CDE883C4BDA0466935E;
+			remoteInfo = LiftOS;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		013C9BD58C161C857268477B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -57,6 +67,7 @@
 		19D2BCB508327C146D9967F6 /* ActiveWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveWorkoutView.swift; sourceTree = "<group>"; };
 		257419616EA5C28ED05BCF90 /* WorkoutPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutPlan.swift; sourceTree = "<group>"; };
 		25956B1BB7B7E75F3E1E3027 /* WorkoutSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutSummaryView.swift; sourceTree = "<group>"; };
+		275EDDD42F91D067009CDA8F /* LiftOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LiftOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		278A483E2F90617000C5CEC3 /* exercises.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = exercises.json; sourceTree = "<group>"; };
 		2B44498D749343EAE93C8E56 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		2BFD8780AEBA632E8DF7AFE2 /* PlanWeek.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanWeek.swift; sourceTree = "<group>"; };
@@ -90,17 +101,36 @@
 		E535FC8B221A26742DB444D8 /* RestTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestTimerView.swift; sourceTree = "<group>"; };
 		F00DBABE1111111111111110 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		F00DBABE2222222222222220 /* CalendarHeatmapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarHeatmapView.swift; sourceTree = "<group>"; };
-		F7B53C0D1CEC06EB190031A9 /* LiftOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiftOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		FE61A0C7576D95453123AA64 /* LiftOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiftOSApp.swift; sourceTree = "<group>"; };
 		F00DBABE3333333333333330 /* ProgressTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressTab.swift; sourceTree = "<group>"; };
 		F00DBABE4444444444444440 /* ProgressCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressCalculator.swift; sourceTree = "<group>"; };
+		F7B53C0D1CEC06EB190031A9 /* LiftOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiftOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FE61A0C7576D95453123AA64 /* LiftOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiftOSApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		275EDDD52F91D067009CDA8F /* LiftOSTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = LiftOSTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		275EDDD12F91D067009CDA8F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		03961A8DBD79B128F3B41186 = {
 			isa = PBXGroup;
 			children = (
 				36974FF09F0158F18BD142F7 /* LiftOS */,
+				275EDDD52F91D067009CDA8F /* LiftOSTests */,
 				064469986BEBA484BA613FF4 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -109,6 +139,7 @@
 			isa = PBXGroup;
 			children = (
 				F7B53C0D1CEC06EB190031A9 /* LiftOS.app */,
+				275EDDD42F91D067009CDA8F /* LiftOSTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -285,6 +316,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		275EDDD32F91D067009CDA8F /* LiftOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 275EDDDC2F91D067009CDA8F /* Build configuration list for PBXNativeTarget "LiftOSTests" */;
+			buildPhases = (
+				275EDDD02F91D067009CDA8F /* Sources */,
+				275EDDD12F91D067009CDA8F /* Frameworks */,
+				275EDDD22F91D067009CDA8F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				275EDDD92F91D067009CDA8F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				275EDDD52F91D067009CDA8F /* LiftOSTests */,
+			);
+			name = LiftOSTests;
+			packageProductDependencies = (
+			);
+			productName = LiftOSTests;
+			productReference = 275EDDD42F91D067009CDA8F /* LiftOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		946C5CDE883C4BDA0466935E /* LiftOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1920F4A986A10EFCF702DAAF /* Build configuration list for PBXNativeTarget "LiftOS" */;
@@ -310,7 +364,14 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2640;
+				TargetAttributes = {
+					275EDDD32F91D067009CDA8F = {
+						CreatedOnToolsVersion = 26.4;
+						TestTargetID = 946C5CDE883C4BDA0466935E;
+					};
+				};
 			};
 			buildConfigurationList = 2EA5B51B3A031F5189266DCC /* Build configuration list for PBXProject "LiftOS" */;
 			developmentRegion = en;
@@ -327,11 +388,19 @@
 			projectRoot = "";
 			targets = (
 				946C5CDE883C4BDA0466935E /* LiftOS */,
+				275EDDD32F91D067009CDA8F /* LiftOSTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		275EDDD22F91D067009CDA8F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B6FC2728FBE29F9BEF5D6EDF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -344,6 +413,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		275EDDD02F91D067009CDA8F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A56FAF08EAB8434B17C70E01 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -392,7 +468,75 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		275EDDD92F91D067009CDA8F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 946C5CDE883C4BDA0466935E /* LiftOS */;
+			targetProxy = 275EDDD82F91D067009CDA8F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		275EDDDA2F91D067009CDA8F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U3YP7WBZ6K;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = GCtech.LiftOSTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LiftOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LiftOS";
+			};
+			name = Debug;
+		};
+		275EDDDB2F91D067009CDA8F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U3YP7WBZ6K;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = GCtech.LiftOSTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LiftOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LiftOS";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		95DAED164BBC16536A64F57D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -576,6 +720,15 @@
 			buildConfigurations = (
 				D7620D27469E8C2798D67EE8 /* Debug */,
 				95DAED164BBC16536A64F57D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		275EDDDC2F91D067009CDA8F /* Build configuration list for PBXNativeTarget "LiftOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				275EDDDA2F91D067009CDA8F /* Debug */,
+				275EDDDB2F91D067009CDA8F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
