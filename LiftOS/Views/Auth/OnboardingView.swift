@@ -10,13 +10,13 @@ struct OnboardingView: View {
     private let pages: [OnboardingPage] = [
         OnboardingPage(
             symbol: "figure.strengthtraining.traditional",
-            title: "Welcome to LiftOS",
+            title: "Welcome to AdaptOS",
             description: "A workout tracker built for serious lifters. Track every set, beat every session."
         ),
         OnboardingPage(
             symbol: "arrow.up.right.circle.fill",
             title: "Beat Last Week",
-            description: "See your previous reps and weight inline every set. Hit your target range — LiftOS bumps the weight automatically."
+            description: "See your previous reps and weight inline every set. Hit your target range — AdaptOS bumps the weight automatically."
         ),
         OnboardingPage(
             symbol: "calendar.badge.checkmark",
