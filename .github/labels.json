@@ -1,0 +1,33 @@
+[
+  { "name": "type:bug",         "color": "d73a4a", "description": "Something is broken or behaves wrong" },
+  { "name": "type:feature",     "color": "0e8a16", "description": "New user-facing capability" },
+  { "name": "type:enhancement", "color": "a2eeef", "description": "Improvement to something that already exists" },
+  { "name": "type:tech-debt",   "color": "fbca04", "description": "Code quality / refactor with no user-visible change" },
+  { "name": "type:chore",       "color": "c5def5", "description": "Tooling, dependencies, CI, docs" },
+
+  { "name": "priority:P0-now",     "color": "b60205", "description": "Drop everything. Prod broken or data at risk" },
+  { "name": "priority:P1-soon",    "color": "d93f0b", "description": "Important, next up" },
+  { "name": "priority:P2-later",   "color": "fbca04", "description": "Planned but not urgent (default for new issues)" },
+  { "name": "priority:P3-someday", "color": "cccccc", "description": "Nice to have. Backlog" },
+
+  { "name": "area:workout-logging", "color": "1d76db", "description": "Active workout flow, set logging, rest timer UI" },
+  { "name": "area:plan-builder",    "color": "1d76db", "description": "Creating / editing plans, weeks, routines" },
+  { "name": "area:history",         "color": "1d76db", "description": "History tab, past sessions, calendar heatmap" },
+  { "name": "area:progress",        "color": "1d76db", "description": "Progress charts, PRs, dashboards" },
+  { "name": "area:rest-timer",      "color": "1d76db", "description": "Rest timer logic, notifications, Live Activity" },
+  { "name": "area:data-model",      "color": "1d76db", "description": "SwiftData schema, migrations, persistence" },
+  { "name": "area:ui-polish",       "color": "1d76db", "description": "Haptics, animations, theme, micro-interactions" },
+  { "name": "area:onboarding",      "color": "1d76db", "description": "First-launch flow, empty states, Sign in with Apple" },
+  { "name": "area:profile",         "color": "1d76db", "description": "Profile tab, settings, user preferences" },
+  { "name": "area:ai-assistant",    "color": "1d76db", "description": "Claude-powered plan generation, substitutions" },
+  { "name": "area:apple-watch",     "color": "1d76db", "description": "Apple Watch companion app" },
+  { "name": "area:tooling",         "color": "1d76db", "description": "Xcode project, build, CI, scripts" },
+
+  { "name": "status:needs-triage", "color": "ededed", "description": "Not yet reviewed / prioritized" },
+  { "name": "status:blocked",      "color": "000000", "description": "Waiting on an external dependency or decision" },
+  { "name": "status:in-progress",  "color": "0e8a16", "description": "Actively being worked on" },
+  { "name": "status:on-hold",      "color": "cccccc", "description": "Paused intentionally" },
+
+  { "name": "good first task", "color": "7057ff", "description": "Small, self-contained — a good warmup ticket" },
+  { "name": "discussion",      "color": "d4c5f9", "description": "Needs a decision before work begins" }
+]

@@ -1,0 +1,92 @@
+name: CI
+
+# Runs on every PR targeting main, plus pushes to main itself.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel older in-flight runs of this workflow for the same ref
+# (e.g. if you push a new commit to a PR, the old CI run stops).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (iOS Simulator)
+    runs-on: macos-15
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        # Pin to an Xcode that ships Swift 6.3 / iOS 17+ SDK.
+        # Adjust this when GitHub's macOS runners add a newer Xcode image.
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Show Xcode & Swift versions
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Resolve package dependencies
+        run: |
+          xcodebuild \
+            -resolvePackageDependencies \
+            -project AdaptOS.xcodeproj \
+            -scheme LiftOS
+
+      - name: Build for iOS Simulator
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project AdaptOS.xcodeproj \
+            -scheme LiftOS \
+            -configuration Debug \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -skipPackagePluginValidation \
+            clean build \
+            CODE_SIGNING_ALLOWED=NO | xcbeautify --renderer github-actions || \
+          xcodebuild \
+            -project AdaptOS.xcodeproj \
+            -scheme LiftOS \
+            -configuration Debug \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -skipPackagePluginValidation \
+            clean build \
+            CODE_SIGNING_ALLOWED=NO
+
+  test:
+    name: Unit tests
+    runs-on: macos-15
+    timeout-minutes: 25
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Run tests
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project AdaptOS.xcodeproj \
+            -scheme LiftOS \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -skipPackagePluginValidation \
+            test \
+            CODE_SIGNING_ALLOWED=NO | xcbeautify --renderer github-actions || \
+          xcodebuild \
+            -project AdaptOS.xcodeproj \
+            -scheme LiftOS \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -skipPackagePluginValidation \
+            test \
+            CODE_SIGNING_ALLOWED=NO
