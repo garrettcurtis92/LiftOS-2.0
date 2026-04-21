@@ -1,0 +1,99 @@
+name: "🐛 Bug report"
+description: Something is broken or behaves wrong.
+title: "[Bug]: "
+labels: ["type:bug", "priority:P2-later"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. The more detail you can give, the faster it gets fixed.
+        Triage will adjust the priority label — default is P2.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear, concise description of the bug.
+      placeholder: "Rest timer stops counting when the app backgrounds..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Minimal sequence someone else can follow to see the bug.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: "Rest timer should continue in the background and notify at zero."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: "Timer pauses on background, no notification fires."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area of the app
+      options:
+        - workout-logging
+        - plan-builder
+        - history
+        - progress
+        - rest-timer
+        - data-model
+        - ui-polish
+        - onboarding
+        - profile
+        - other
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device & iOS version
+      placeholder: "iPhone 15 Pro, iOS 18.4"
+    validations:
+      required: true
+
+  - type: input
+    id: build
+    attributes:
+      label: App build / version
+      placeholder: "0.9.2 (TestFlight build 14)"
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Screenshots, video, or logs
+      description: Drag & drop or paste. Especially helpful for UI bugs.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checklist
+      options:
+        - label: I searched existing issues and this isn't a duplicate.
+          required: true
+        - label: I can reproduce this consistently.
+          required: false

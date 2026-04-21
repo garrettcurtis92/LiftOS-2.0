@@ -1,0 +1,20 @@
+# CODEOWNERS
+#
+# GitHub uses this file to auto-request reviews when a PR touches certain paths.
+# As a solo dev, you're the owner of everything — but wiring this up now means
+# that when you add collaborators later, the routing is already in place.
+#
+# Syntax: <pattern> <owner> [<owner> ...]
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default: any file not matched by a later rule
+* @garrettcurtis92
+
+# Core engines and data model — flag these for extra care
+/LiftOS/Services/ProgressionEngine.swift   @garrettcurtis92
+/LiftOS/Services/SessionBuilder.swift      @garrettcurtis92
+/LiftOS/Models/                            @garrettcurtis92
+
+# CI / tooling
+/.github/                                  @garrettcurtis92
+/project.yml                               @garrettcurtis92

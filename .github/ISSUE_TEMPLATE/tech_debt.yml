@@ -1,0 +1,61 @@
+name: "🧹 Tech debt / refactor"
+description: Internal code quality work with no user-visible change.
+title: "[Tech debt]: "
+labels: ["type:tech-debt", "priority:P3-someday"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Tech debt tickets describe code smells, design issues, or refactors.
+        They should explain the *cost* of leaving it and the *benefit* of fixing it.
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current state
+      description: What does the code look like today? Point to files/lines.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Why is this a problem?
+      description: What's the cost of leaving this? (bugs, slower dev, hard to test, etc.)
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed refactor
+      description: What would you change? Rough shape is fine.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area of the app
+      options:
+        - workout-logging
+        - plan-builder
+        - history
+        - progress
+        - rest-timer
+        - data-model
+        - ui-polish
+        - onboarding
+        - profile
+        - tooling
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risk / blast radius
+      description: What could go wrong during the refactor? What tests cover this?
+    validations:
+      required: false

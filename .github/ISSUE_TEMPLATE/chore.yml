@@ -1,0 +1,29 @@
+name: "🔧 Chore"
+description: Tooling, dependencies, CI, or build system changes.
+title: "[Chore]: "
+labels: ["type:chore", "priority:P3-someday"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What needs to be done?
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why now?
+      description: What triggered this? (security advisory, failing build, dev pain, etc.)
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Definition of done
+      value: |
+        - [ ]
+        - [ ]
+    validations:
+      required: true

@@ -1,0 +1,76 @@
+name: "✨ Feature request"
+description: Propose a new user-facing capability.
+title: "[Feature]: "
+labels: ["type:feature", "priority:P2-later"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Features should tie back to a clear user problem. The "Why" matters more than the "What".
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the user pain this addresses.
+      placeholder: "I can't see my rest timer when the app is backgrounded, so I miss the end of rest and my next set is late..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What would you build? Be specific. Sketches welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What else did you think about? Why is your proposal better?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area of the app
+      options:
+        - workout-logging
+        - plan-builder
+        - history
+        - progress
+        - rest-timer
+        - data-model
+        - ui-polish
+        - onboarding
+        - profile
+        - ai-assistant
+        - apple-watch
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How will we know this is done? Checklist of observable behaviors.
+      value: |
+        - [ ]
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checklist
+      options:
+        - label: I searched existing issues and this isn't a duplicate.
+          required: true
+        - label: This aligns with the project vision in `docs/PROJECT_PLAN.md`.
+          required: false
