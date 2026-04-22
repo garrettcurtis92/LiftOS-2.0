@@ -47,7 +47,7 @@ jobs:
             -project AdaptOS.xcodeproj \
             -scheme LiftOS \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=17.2' \
             -skipPackagePluginValidation \
             clean build \
             CODE_SIGNING_ALLOWED=NO | xcbeautify --renderer github-actions || \
@@ -55,7 +55,7 @@ jobs:
             -project AdaptOS.xcodeproj \
             -scheme LiftOS \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=17.2' \
             -skipPackagePluginValidation \
             clean build \
             CODE_SIGNING_ALLOWED=NO
@@ -79,14 +79,14 @@ jobs:
           xcodebuild \
             -project AdaptOS.xcodeproj \
             -scheme LiftOS \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=17.2' \
             -skipPackagePluginValidation \
             test \
             CODE_SIGNING_ALLOWED=NO | xcbeautify --renderer github-actions || \
           xcodebuild \
             -project AdaptOS.xcodeproj \
             -scheme LiftOS \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=17.2' \
             -skipPackagePluginValidation \
             test \
             CODE_SIGNING_ALLOWED=NO
