@@ -11,7 +11,6 @@ struct RoutineEditorView: View {
     @State private var showSyncPrompt = false
     @State private var pendingSyncAction: (() -> Void)? = nil
     @State private var pendingExercise: Exercise? = nil
-    @State private var showExerciseConfig = false
     @State private var showEditRoutine = false
 
     private var isWeekOne: Bool {
@@ -58,11 +57,7 @@ struct RoutineEditorView: View {
                 .presentationDragIndicator(.visible)
                 .presentationCornerRadius(20)
         }
-        .sheet(isPresented: $showingExercisePicker, onDismiss: {
-            if pendingExercise != nil {
-                showExerciseConfig = true
-            }
-        }) {
+        .sheet(isPresented: $showingExercisePicker) {
             ExercisePickerView { exercise in
                 pendingExercise = exercise
                 showingExercisePicker = false
@@ -71,15 +66,14 @@ struct RoutineEditorView: View {
             .presentationDragIndicator(.visible)
             .presentationCornerRadius(20)
         }
-        .sheet(isPresented: $showExerciseConfig) {
-            if let exercise = pendingExercise {
-                ExerciseConfigSheet(exercise: exercise) { sets, repMin, repMax, weight in
-                    addExercise(exercise, sets: sets, repMin: repMin, repMax: repMax, weight: weight)
-                    pendingExercise = nil
-                }
-                .presentationDragIndicator(.visible)
-                .presentationCornerRadius(20)
+        .sheet(item: $pendingExercise) { exercise in
+            ExerciseConfigSheet(exercise: exercise) { sets, repMin, repMax, weight in
+                addExercise(exercise, sets: sets, repMin: repMin, repMax: repMax, weight: weight)
+                pendingExercise = nil
             }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+            .presentationCornerRadius(20)
         }
         .confirmationDialog(
             "Remove \(exerciseToDelete?.exercise?.name ?? "Exercise")?",
