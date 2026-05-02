@@ -1,7 +1,7 @@
 import Testing
 import Foundation
 import SwiftData
-@testable import LiftOS
+@testable import AdaptOS
 
 // MARK: - ProgressionEngine Tests
 
@@ -318,5 +318,51 @@ struct PlanSyncServiceTests {
         PlanSyncService.replicateRoutine(routine, across: plan)
 
         #expect(week2.routines.count == 1)
+    }
+}
+
+// MARK: - SessionExercise.reorder Tests
+
+@Suite("SessionExercise.reorder")
+struct SessionExerciseReorderTests {
+
+    private func makeExercises(count: Int) -> [SessionExercise] {
+        (0..<count).map { SessionExercise(sortOrder: $0) }
+    }
+
+    @Test("Move single item from index 2 to index 0 reindexes sortOrder")
+    func moveUp() {
+        let items = makeExercises(count: 4)
+        SessionExercise.reorder(items, from: IndexSet(integer: 2), to: 0)
+
+        // Starting [A,B,C,D] sortOrders [0,1,2,3]
+        // After move(fromOffsets: [2], toOffset: 0): [C,A,B,D]
+        // Reindexed: A=1, B=2, C=0, D=3
+        #expect(items[0].sortOrder == 1)
+        #expect(items[1].sortOrder == 2)
+        #expect(items[2].sortOrder == 0)
+        #expect(items[3].sortOrder == 3)
+    }
+
+    @Test("Move from index 0 to index 3 reindexes sortOrder")
+    func moveDown() {
+        let items = makeExercises(count: 4)
+        SessionExercise.reorder(items, from: IndexSet(integer: 0), to: 3)
+
+        // After move(fromOffsets: [0], toOffset: 3): [B,C,A,D]
+        // Reindexed: A=2, B=0, C=1, D=3
+        #expect(items[0].sortOrder == 2)
+        #expect(items[1].sortOrder == 0)
+        #expect(items[2].sortOrder == 1)
+        #expect(items[3].sortOrder == 3)
+    }
+
+    @Test("Move with empty IndexSet is a no-op")
+    func moveEmpty() {
+        let items = makeExercises(count: 3)
+        SessionExercise.reorder(items, from: IndexSet(), to: 0)
+        #expect(items[0].sortOrder == 0)
+        #expect(items[1].sortOrder == 1)
+        #expect(items[2].sortOrder == 2)
     }
 }
