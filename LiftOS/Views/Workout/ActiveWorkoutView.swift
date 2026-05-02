@@ -23,13 +23,15 @@ struct ActiveWorkoutView: View {
     @State private var addExerciseTrigger = false
     @State private var finishTrigger = false
     @State private var autoRestTimer = true
+    @State private var editMode: EditMode = .inactive
+    @State private var reorderTrigger = false
 
     var body: some View {
         VStack(spacing: 0) {
             workoutHeader
 
-            ScrollView {
-                LazyVStack(spacing: 16) {
+            List {
+                Section {
                     ForEach(session.sortedExercises) { sessionExercise in
                         ExerciseLogCard(
                             sessionExercise: sessionExercise,
@@ -46,11 +48,33 @@ struct ActiveWorkoutView: View {
                                 showSwapPicker = true
                             }
                         )
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     }
-
-                    addExerciseButton
+                    .onMove { source, destination in
+                        SessionExercise.reorder(session.sortedExercises, from: source, to: destination)
+                        reorderTrigger.toggle()
+                    }
                 }
-                .padding()
+
+                if !editMode.isEditing {
+                    Section {
+                        addExerciseButton
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 16, trailing: 16))
+                    }
+                }
+            }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .environment(\.editMode, $editMode)
+            .sensoryFeedback(.success, trigger: reorderTrigger)
+            .onChange(of: editMode.isEditing) { _, isEditing in
+                if isEditing {
+                    expandedExerciseID = nil
+                }
             }
 
             bottomBar
@@ -61,6 +85,10 @@ struct ActiveWorkoutView: View {
                 Button("Cancel", role: .destructive) {
                     showDiscardConfirmation = true
                 }
+                .disabled(editMode.isEditing)
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                EditButton()
             }
         }
         .sheet(isPresented: $showExercisePicker) {
