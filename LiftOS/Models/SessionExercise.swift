@@ -32,4 +32,15 @@ final class SessionExercise {
         self.notes = notes
         self.sets = []
     }
+
+    /// Applies a SwiftUI `.onMove` operation to a list of session exercises and reindexes
+    /// `sortOrder` to match the new positions.
+    static func reorder(_ exercises: [SessionExercise], from source: IndexSet, to destination: Int) {
+        guard !source.isEmpty else { return }
+        var reordered = exercises
+        reordered.move(fromOffsets: source, toOffset: destination)
+        for (index, exercise) in reordered.enumerated() {
+            exercise.sortOrder = index
+        }
+    }
 }
