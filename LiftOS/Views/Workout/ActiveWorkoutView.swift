@@ -188,12 +188,12 @@ struct ActiveWorkoutView: View {
             } label: {
                 Image(systemName: autoRestTimer ? "timer" : "timer.slash")
                     .font(.body.weight(.medium))
-                    .foregroundStyle(autoRestTimer ? Color.accentColor : .secondary)
+                    .foregroundStyle(autoRestTimer ? LiftTheme.accent : .secondary)
                     .frame(minWidth: 44, minHeight: 44)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .padding(.trailing, 16)
+            .padding(.trailing, LiftTheme.cardSpacing)
             .accessibilityLabel("Auto rest timer")
             .accessibilityValue(autoRestTimer ? "On" : "Off")
             .accessibilityHint("Double-tap to toggle automatic rest timer between sets")
@@ -361,7 +361,7 @@ struct ExerciseLogCard: View {
 
                 if isExpanded {
                     Divider()
-                        .padding(.vertical, 8)
+                        .padding(.vertical, LiftTheme.compactSpacing)
 
                     if !dynamicTypeSize.isAccessibilitySize {
                         setHeader
@@ -389,7 +389,7 @@ struct ExerciseLogCard: View {
         HStack {
             if let exercise = sessionExercise.exercise {
                 Image(systemName: exercise.muscleGroup.symbolName)
-                    .foregroundStyle(Color.accentColor)
+                    .foregroundStyle(LiftTheme.accent)
                     .frame(width: 28)
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -449,7 +449,7 @@ struct ExerciseLogCard: View {
         }
         .font(.caption2.weight(.semibold))
         .foregroundStyle(.secondary)
-        .padding(.bottom, 4)
+        .padding(.bottom, LiftTheme.listItemSpacing)
         .accessibilityHidden(true)
     }
 
@@ -476,7 +476,7 @@ struct ExerciseLogCard: View {
                 .font(.subheadline)
         }
         .buttonStyle(.borderless)
-        .padding(.top, 8)
+        .padding(.top, LiftTheme.compactSpacing)
         .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.5), trigger: addSetTrigger)
     }
 }
@@ -522,7 +522,7 @@ struct SetLogRow: View {
                 rirSelector
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, LiftTheme.listItemSpacing)
         .accessibilityActions { rowAccessibilityActions }
         .onAppear {
             weightText = sessionSet.weight > 0 ? formatWeight(sessionSet.weight) : ""
@@ -561,7 +561,7 @@ struct SetLogRow: View {
                     .foregroundStyle(.white)
                     .frame(width: 60, height: 36)
                     .background(Color.red)
-                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                    .clipShape(RoundedRectangle(cornerRadius: LiftTheme.inputCornerRadius))
             }
             .buttonStyle(.plain)
             .opacity(showDeleteButton ? 1 : 0)
@@ -577,7 +577,7 @@ struct SetLogRow: View {
             completionButton
         }
         .offset(x: swipeOffset)
-        .background(rowFlash ? Color.green.opacity(0.08) : Color.clear)
+        .background(rowFlash ? LiftTheme.success.opacity(0.08) : Color.clear)
         .gesture(swipeGesture)
     }
 
@@ -606,7 +606,7 @@ struct SetLogRow: View {
             }
         }
         .offset(x: swipeOffset)
-        .background(rowFlash ? Color.green.opacity(0.08) : Color.clear)
+        .background(rowFlash ? LiftTheme.success.opacity(0.08) : Color.clear)
         .gesture(swipeGesture)
     }
 
@@ -625,7 +625,7 @@ struct SetLogRow: View {
         } label: {
             Text(sessionSet.isWarmup ? "W" : "\(sessionSet.setNumber)")
                 .font(.subheadline.weight(.medium))
-                .foregroundStyle(sessionSet.isWarmup ? .orange : .primary)
+                .foregroundStyle(sessionSet.isWarmup ? LiftTheme.warmup : .primary)
                 .frame(width: 36, alignment: .leading)
                 .frame(minHeight: 44)
                 .contentShape(Rectangle())
@@ -650,8 +650,8 @@ struct SetLogRow: View {
             .multilineTextAlignment(.center)
             .font(.body.weight(.medium))
             .padding(.vertical, 6)
-            .background(Color.secondarySystemBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .background(LiftTheme.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: LiftTheme.inputCornerRadius))
             .focused($focusedField, equals: .weight)
             .accessibilityLabel("Weight")
             .onChange(of: weightText) { _, newValue in
@@ -670,8 +670,8 @@ struct SetLogRow: View {
             .multilineTextAlignment(.center)
             .font(.body.weight(.medium))
             .padding(.vertical, 6)
-            .background(Color.secondarySystemBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .background(LiftTheme.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: LiftTheme.inputCornerRadius))
             .focused($focusedField, equals: .reps)
             .accessibilityLabel("Reps")
             .onChange(of: repsText) { _, newValue in
@@ -685,7 +685,7 @@ struct SetLogRow: View {
         } label: {
             Image(systemName: sessionSet.isCompleted ? "checkmark.circle.fill" : "circle")
                 .font(.title3)
-                .foregroundStyle(sessionSet.isCompleted ? .green : .secondary)
+                .foregroundStyle(sessionSet.isCompleted ? LiftTheme.success : .secondary)
                 .scaleEffect(checkmarkScale)
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
@@ -739,7 +739,7 @@ struct SetLogRow: View {
             Spacer()
             rirCloseButton
         }
-        .padding(.top, 4)
+        .padding(.top, LiftTheme.listItemSpacing)
         .padding(.leading, 36)
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
@@ -762,7 +762,7 @@ struct SetLogRow: View {
             }
             .sensoryFeedback(.selection, trigger: sessionSet.rir)
         }
-        .padding(.top, 4)
+        .padding(.top, LiftTheme.listItemSpacing)
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 
@@ -774,9 +774,9 @@ struct SetLogRow: View {
             Text("\(value)")
                 .font(.caption.weight(.medium))
                 .frame(width: 32, height: 28)
-                .background(sessionSet.rir == value ? Color.accentColor : Color.secondarySystemBackground)
+                .background(sessionSet.rir == value ? LiftTheme.accent : LiftTheme.cardBackground)
                 .foregroundStyle(sessionSet.rir == value ? .white : .primary)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .clipShape(RoundedRectangle(cornerRadius: LiftTheme.inputCornerRadius))
                 .frame(minWidth: 44, minHeight: 44)
                 .contentShape(Rectangle())
         }
