@@ -337,6 +337,7 @@ struct ActiveWorkoutView: View {
 struct ExerciseLogCard: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Bindable var sessionExercise: SessionExercise
     let previousSets: [Int: String]
     let isExpanded: Bool
@@ -362,7 +363,9 @@ struct ExerciseLogCard: View {
                     Divider()
                         .padding(.vertical, 8)
 
-                    setHeader
+                    if !dynamicTypeSize.isAccessibilitySize {
+                        setHeader
+                    }
 
                     ForEach(sessionExercise.sortedSets) { sessionSet in
                         SetLogRow(
@@ -482,6 +485,7 @@ struct ExerciseLogCard: View {
 
 struct SetLogRow: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Bindable var sessionSet: SessionSet
     let allSets: [SessionSet]
     let previousDisplay: String?
@@ -507,7 +511,11 @@ struct SetLogRow: View {
         VStack(spacing: 0) {
             ZStack(alignment: .trailing) {
                 swipeDeleteButton
-                mainRow
+                if dynamicTypeSize.isAccessibilitySize {
+                    accessibilityRow
+                } else {
+                    mainRow
+                }
             }
 
             if showRIR && sessionSet.isCompleted {
@@ -564,13 +572,51 @@ struct SetLogRow: View {
         HStack {
             setNumberButton
             previousLabel
-            weightField
-            repsField
+            weightField.frame(width: 72)
+            repsField.frame(width: 56)
             completionButton
         }
         .offset(x: swipeOffset)
         .background(rowFlash ? Color.green.opacity(0.08) : Color.clear)
         .gesture(swipeGesture)
+    }
+
+    private var accessibilityRow: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                setNumberButton
+                Spacer()
+                completionButton
+            }
+
+            if previousDisplay != nil {
+                HStack(spacing: 6) {
+                    Text("Last:")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Text(previousDisplay ?? "")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+
+            HStack(alignment: .bottom, spacing: 12) {
+                labeledField("Weight", field: weightField)
+                labeledField("Reps", field: repsField)
+            }
+        }
+        .offset(x: swipeOffset)
+        .background(rowFlash ? Color.green.opacity(0.08) : Color.clear)
+        .gesture(swipeGesture)
+    }
+
+    private func labeledField<Field: View>(_ label: String, field: Field) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            field.frame(maxWidth: .infinity)
+        }
     }
 
     private var setNumberButton: some View {
@@ -603,7 +649,6 @@ struct SetLogRow: View {
             .keyboardType(.decimalPad)
             .multilineTextAlignment(.center)
             .font(.body.weight(.medium))
-            .frame(width: 72)
             .padding(.vertical, 6)
             .background(Color.secondarySystemBackground)
             .clipShape(RoundedRectangle(cornerRadius: 6))
@@ -624,7 +669,6 @@ struct SetLogRow: View {
             .keyboardType(.numberPad)
             .multilineTextAlignment(.center)
             .font(.body.weight(.medium))
-            .frame(width: 56)
             .padding(.vertical, 6)
             .background(Color.secondarySystemBackground)
             .clipShape(RoundedRectangle(cornerRadius: 6))
@@ -674,7 +718,16 @@ struct SetLogRow: View {
             }
     }
 
+    @ViewBuilder
     private var rirSelector: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            accessibilityRIRSelector
+        } else {
+            compactRIRSelector
+        }
+    }
+
+    private var compactRIRSelector: some View {
         HStack(spacing: 6) {
             Text("RIR")
                 .font(.caption2.weight(.semibold))
@@ -688,6 +741,28 @@ struct SetLogRow: View {
         }
         .padding(.top, 4)
         .padding(.leading, 36)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
+    }
+
+    private var accessibilityRIRSelector: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("RIR")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                rirCloseButton
+            }
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(0...5, id: \.self) { value in
+                        rirChip(for: value)
+                    }
+                }
+            }
+            .sensoryFeedback(.selection, trigger: sessionSet.rir)
+        }
+        .padding(.top, 4)
         .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 
