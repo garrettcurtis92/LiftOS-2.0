@@ -22,6 +22,7 @@
 		4951174867C6D588F97E7C65 /* ActiveWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19D2BCB508327C146D9967F6 /* ActiveWorkoutView.swift */; };
 		4B82653AD198540618664197 /* SessionBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDBC2CB356ECD7937FAD5451 /* SessionBuilder.swift */; };
 		4C0E41A637D3B829CB54CCE3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013C9BD58C161C857268477B /* ContentView.swift */; };
+		59E088C78848F9CC95044217 /* Animation+LiftOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58523C64999E32F3528544C8 /* Animation+LiftOS.swift */; };
 		5C6FC847278AEBF164DD76B6 /* View+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABC108F080FF10450D81AC3A /* View+Extensions.swift */; };
 		5CCFD411B64E501A8609C0F1 /* ModelContainer+LiftOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C3FA73719F0D26DB955850C /* ModelContainer+LiftOS.swift */; };
 		62DBE72CFF6480CD87A257CD /* NewPlanSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 791F33AA71FFEEDDA765EC87 /* NewPlanSheet.swift */; };
@@ -77,6 +78,7 @@
 		4BBC8CB1DC163170E7711348 /* DateFormatter+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateFormatter+Extensions.swift"; sourceTree = "<group>"; };
 		523D2D58097E498739F4ED7B /* SessionExercise.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionExercise.swift; sourceTree = "<group>"; };
 		5318049FF0E3C2383A6208C9 /* ProgressionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressionEngine.swift; sourceTree = "<group>"; };
+		58523C64999E32F3528544C8 /* Animation+LiftOS.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "Animation+LiftOS.swift"; sourceTree = "<group>"; };
 		5C10D0DEA4EFFF0C859AB558 /* HomeTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTab.swift; sourceTree = "<group>"; };
 		791F33AA71FFEEDDA765EC87 /* NewPlanSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewPlanSheet.swift; sourceTree = "<group>"; };
 		7C3FA73719F0D26DB955850C /* ModelContainer+LiftOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ModelContainer+LiftOS.swift"; sourceTree = "<group>"; };
@@ -112,6 +114,8 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		275EDDD52F91D067009CDA8F /* LiftOSTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = LiftOSTests;
 			sourceTree = "<group>";
 		};
@@ -260,6 +264,7 @@
 				7C3FA73719F0D26DB955850C /* ModelContainer+LiftOS.swift */,
 				D2CFECD4E813033A9073B51B /* Theme.swift */,
 				ABC108F080FF10450D81AC3A /* View+Extensions.swift */,
+				58523C64999E32F3528544C8 /* Animation+LiftOS.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -320,8 +325,6 @@
 				275EDDD52F91D067009CDA8F /* LiftOSTests */,
 			);
 			name = AdaptOSTests;
-			packageProductDependencies = (
-			);
 			productName = LiftOSTests;
 			productReference = 275EDDD42F91D067009CDA8F /* AdaptOSTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -338,8 +341,6 @@
 			dependencies = (
 			);
 			name = AdaptOS;
-			packageProductDependencies = (
-			);
 			productName = LiftOS;
 			productReference = F7B53C0D1CEC06EB190031A9 /* AdaptOS.app */;
 			productType = "com.apple.product-type.application";
@@ -451,6 +452,7 @@
 				ACC209C8E82FA5771ECDD77F /* WorkoutPlan.swift in Sources */,
 				68A35911F7E89D353B97B8E7 /* WorkoutSession.swift in Sources */,
 				8431073F7200BD12D01B0826 /* WorkoutSummaryView.swift in Sources */,
+				59E088C78848F9CC95044217 /* Animation+LiftOS.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -492,7 +494,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AdaptOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AdaptOS";
 			};
 			name = Debug;
@@ -519,7 +521,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AdaptOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AdaptOS";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -550,7 +552,7 @@
 				PRODUCT_NAME = AdaptOS;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -635,7 +637,7 @@
 				PRODUCT_NAME = AdaptOS;
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
