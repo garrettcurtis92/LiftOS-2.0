@@ -4,6 +4,7 @@ import SwiftData
 struct ActiveWorkoutView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Bindable var session: WorkoutSession
 
     @State private var elapsedSeconds: Int = 0
@@ -187,9 +188,14 @@ struct ActiveWorkoutView: View {
                 Image(systemName: autoRestTimer ? "timer" : "timer.slash")
                     .font(.body.weight(.medium))
                     .foregroundStyle(autoRestTimer ? Color.accentColor : .secondary)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .padding(.trailing, 16)
+            .accessibilityLabel("Auto rest timer")
+            .accessibilityValue(autoRestTimer ? "On" : "Off")
+            .accessibilityHint("Double-tap to toggle automatic rest timer between sets")
             .sensoryFeedback(.selection, trigger: autoRestTimer)
         }
         .frame(maxWidth: .infinity)
@@ -232,7 +238,7 @@ struct ActiveWorkoutView: View {
     // MARK: - Actions
 
     private func toggleExpanded(_ exercise: SessionExercise) {
-        withAnimation(.easeInOut(duration: 0.2)) {
+        withAnimation(.liftEaseInOut(duration: 0.2, reduceMotion: reduceMotion)) {
             expandedExerciseID = expandedExerciseID == exercise.id ? nil : exercise.id
         }
     }
@@ -347,6 +353,7 @@ struct ActiveWorkoutView: View {
 
 struct ExerciseLogCard: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Bindable var sessionExercise: SessionExercise
     let previousSets: [Int: String]
     let isExpanded: Bool
@@ -428,8 +435,11 @@ struct ExerciseLogCard: View {
                 Image(systemName: "ellipsis")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
-                    .padding(8)
+                    .frame(minWidth: 44, minHeight: 44)
+                    .contentShape(Rectangle())
             }
+            .accessibilityLabel("Exercise options")
+            .accessibilityHint("Swap or remove this exercise")
 
             Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                 .font(.caption.weight(.semibold))
@@ -449,17 +459,18 @@ struct ExerciseLogCard: View {
                 .frame(width: 56, alignment: .center)
             Image(systemName: "checkmark")
                 .frame(width: 36)
+                .accessibilityHidden(true)
         }
         .font(.caption2.weight(.semibold))
         .foregroundStyle(.secondary)
         .padding(.bottom, 4)
+        .accessibilityHidden(true)
     }
 
     private func deleteSet(_ sessionSet: SessionSet) {
-        withAnimation(.easeOut(duration: 0.2)) {
+        withAnimation(.liftEaseOut(duration: 0.2, reduceMotion: reduceMotion)) {
             sessionExercise.sets.removeAll { $0.id == sessionSet.id }
             modelContext.delete(sessionSet)
-            // Reindex set numbers
             for (index, set) in sessionExercise.sortedSets.enumerated() {
                 set.setNumber = index + 1
             }
@@ -487,6 +498,7 @@ struct ExerciseLogCard: View {
 // MARK: - Set Log Row
 
 struct SetLogRow: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Bindable var sessionSet: SessionSet
     let allSets: [SessionSet]
     let previousDisplay: String?
@@ -527,7 +539,6 @@ struct SetLogRow: View {
                 }
 
                 HStack {
-                    // Set number — tap to toggle warmup
                     Button {
                         sessionSet.isWarmup.toggle()
                     } label: {
@@ -535,8 +546,13 @@ struct SetLogRow: View {
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(sessionSet.isWarmup ? .orange : .primary)
                             .frame(width: 36, alignment: .leading)
+                            .frame(minHeight: 44)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Set \(sessionSet.setNumber)")
+                    .accessibilityValue(sessionSet.isWarmup ? "Warmup" : "Working set")
+                    .accessibilityHint("Double-tap to toggle warmup")
                     .sensoryFeedback(.selection, trigger: sessionSet.isWarmup)
 
                     // Previous session
@@ -545,7 +561,6 @@ struct SetLogRow: View {
                         .foregroundStyle(.tertiary)
                         .frame(maxWidth: .infinity, alignment: .center)
 
-                    // Weight input
                     TextField("0", text: $weightText)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.center)
@@ -555,6 +570,7 @@ struct SetLogRow: View {
                         .background(Color.secondarySystemBackground)
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                         .focused($focusedField, equals: .weight)
+                        .accessibilityLabel("Weight")
                         .onChange(of: weightText) { _, newValue in
                             sessionSet.weight = Double(newValue) ?? 0
                         }
@@ -564,7 +580,6 @@ struct SetLogRow: View {
                             }
                         }
 
-                    // Reps input
                     TextField("0", text: $repsText)
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.center)
@@ -574,11 +589,11 @@ struct SetLogRow: View {
                         .background(Color.secondarySystemBackground)
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                         .focused($focusedField, equals: .reps)
+                        .accessibilityLabel("Reps")
                         .onChange(of: repsText) { _, newValue in
                             sessionSet.reps = Int(newValue) ?? 0
                         }
 
-                    // Complete toggle
                     Button {
                         toggleCompletion()
                     } label: {
@@ -586,9 +601,13 @@ struct SetLogRow: View {
                             .font(.title3)
                             .foregroundStyle(sessionSet.isCompleted ? .green : .secondary)
                             .scaleEffect(checkmarkScale)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.borderless)
-                    .frame(width: 36)
+                    .accessibilityLabel("Set \(sessionSet.setNumber)")
+                    .accessibilityValue(sessionSet.isCompleted ? "Completed" : "Not completed")
+                    .accessibilityHint("Double-tap to toggle completion")
                     .sensoryFeedback(.success, trigger: completionTrigger)
                     .sensoryFeedback(.impact(flexibility: .soft), trigger: uncheckTrigger)
                 }
@@ -603,7 +622,7 @@ struct SetLogRow: View {
                             }
                         }
                         .onEnded { value in
-                            withAnimation(.easeOut(duration: 0.2)) {
+                            withAnimation(.liftEaseOut(duration: 0.2, reduceMotion: reduceMotion)) {
                                 if value.translation.width < -40 {
                                     swipeOffset = -70
                                     showDeleteButton = true
@@ -617,7 +636,6 @@ struct SetLogRow: View {
                 )
             }
 
-            // RIR selector — shown after set is completed
             if showRIR && sessionSet.isCompleted {
                 HStack(spacing: 6) {
                     Text("RIR")
@@ -626,7 +644,7 @@ struct SetLogRow: View {
                     ForEach(0...5, id: \.self) { value in
                         Button {
                             sessionSet.rir = value
-                            withAnimation(.easeOut(duration: 0.2)) { showRIR = false }
+                            withAnimation(.liftEaseOut(duration: 0.2, reduceMotion: reduceMotion)) { showRIR = false }
                         } label: {
                             Text("\(value)")
                                 .font(.caption.weight(.medium))
@@ -634,19 +652,26 @@ struct SetLogRow: View {
                                 .background(sessionSet.rir == value ? Color.accentColor : Color.secondarySystemBackground)
                                 .foregroundStyle(sessionSet.rir == value ? .white : .primary)
                                 .clipShape(RoundedRectangle(cornerRadius: 6))
+                                .frame(minWidth: 44, minHeight: 44)
+                                .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("RIR \(value)")
+                        .accessibilityHint("Reps in reserve. Double-tap to record.")
                     }
                     .sensoryFeedback(.selection, trigger: sessionSet.rir)
                     Spacer()
                     Button {
-                        withAnimation(.easeOut(duration: 0.2)) { showRIR = false }
+                        withAnimation(.liftEaseOut(duration: 0.2, reduceMotion: reduceMotion)) { showRIR = false }
                     } label: {
                         Image(systemName: "xmark")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
+                            .frame(minWidth: 44, minHeight: 44)
+                            .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Close RIR selector")
                 }
                 .padding(.top, 4)
                 .padding(.leading, 36)
@@ -654,6 +679,19 @@ struct SetLogRow: View {
             }
         }
         .padding(.vertical, 4)
+        .accessibilityActions {
+            Button(sessionSet.isCompleted ? "Mark not completed" : "Mark completed") {
+                toggleCompletion()
+            }
+            Button(sessionSet.isWarmup ? "Mark working set" : "Mark as warmup") {
+                sessionSet.isWarmup.toggle()
+            }
+            if let onDelete {
+                Button("Delete set", role: .destructive) {
+                    onDelete()
+                }
+            }
+        }
         .onAppear {
             weightText = sessionSet.weight > 0 ? formatWeight(sessionSet.weight) : ""
             repsText = sessionSet.reps > 0 ? "\(sessionSet.reps)" : ""
@@ -675,34 +713,30 @@ struct SetLogRow: View {
 
     private func toggleCompletion() {
         if sessionSet.isCompleted {
-            // Un-check
             sessionSet.completedAt = nil
             sessionSet.rir = nil
-            withAnimation(.easeOut(duration: 0.2)) { showRIR = false }
+            withAnimation(.liftEaseOut(duration: 0.2, reduceMotion: reduceMotion)) { showRIR = false }
             uncheckTrigger.toggle()
         } else {
-            // Complete — bounce + flash + haptic
             sessionSet.completedAt = Date()
             focusedField = nil
             completionTrigger.toggle()
 
-            // Checkmark scale bounce
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+            withAnimation(.liftBounce(reduceMotion: reduceMotion)) {
                 checkmarkScale = 0.5
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                withAnimation(.liftBounce(reduceMotion: reduceMotion)) {
                     checkmarkScale = 1.0
                 }
             }
 
-            // Row flash
-            withAnimation(.easeIn(duration: 0.1)) { rowFlash = true }
+            withAnimation(.liftEaseOut(duration: 0.1, reduceMotion: reduceMotion)) { rowFlash = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                withAnimation(.easeOut(duration: 0.3)) { rowFlash = false }
+                withAnimation(.liftEaseOut(duration: 0.3, reduceMotion: reduceMotion)) { rowFlash = false }
             }
 
-            withAnimation(.easeOut(duration: 0.25)) { showRIR = true }
+            withAnimation(.liftEaseOut(duration: 0.25, reduceMotion: reduceMotion)) { showRIR = true }
             onCompleted()
         }
     }
