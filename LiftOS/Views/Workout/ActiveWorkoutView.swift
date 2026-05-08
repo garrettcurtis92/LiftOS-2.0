@@ -7,8 +7,6 @@ struct ActiveWorkoutView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Bindable var session: WorkoutSession
 
-    @State private var elapsedSeconds: Int = 0
-    @State private var timer: Timer?
     @State private var showExercisePicker = false
     @State private var showFinishConfirmation = false
     @State private var showDiscardConfirmation = false
@@ -26,6 +24,7 @@ struct ActiveWorkoutView: View {
     @State private var autoRestTimer = true
     @State private var editMode: EditMode = .inactive
     @State private var reorderTrigger = false
+    @State private var previousSetsCache: [UUID: [Int: String]] = [:]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -36,7 +35,7 @@ struct ActiveWorkoutView: View {
                     ForEach(session.sortedExercises) { sessionExercise in
                         ExerciseLogCard(
                             sessionExercise: sessionExercise,
-                            previousSets: previousSets(for: sessionExercise),
+                            previousSets: previousSetsCache[sessionExercise.id] ?? [:],
                             isExpanded: expandedExerciseID == sessionExercise.id,
                             onToggle: { toggleExpanded(sessionExercise) },
                             onSetCompleted: { handleSetCompleted(sessionExercise) },
@@ -161,8 +160,12 @@ struct ActiveWorkoutView: View {
         } message: {
             Text("You can resume this workout later or discard it.")
         }
-        .onAppear { startTimer() }
-        .onDisappear { stopTimer() }
+        .task {
+            refreshPreviousSets()
+        }
+        .onChange(of: session.exercises.count) { _, _ in
+            refreshPreviousSets()
+        }
     }
 
     // MARK: - Header
@@ -175,9 +178,7 @@ struct ActiveWorkoutView: View {
                 Text(session.routine?.name ?? "Quick Workout")
                     .font(.headline)
 
-                Text(formattedElapsed)
-                    .font(.system(.title2, design: .monospaced, weight: .medium))
-                    .foregroundStyle(.secondary)
+                TimerLabel(startedAt: session.startedAt)
             }
 
             Spacer()
@@ -252,7 +253,15 @@ struct ActiveWorkoutView: View {
         }
     }
 
-    private func previousSets(for sessionExercise: SessionExercise) -> [Int: String] {
+    private func refreshPreviousSets() {
+        var newCache: [UUID: [Int: String]] = [:]
+        for sessionExercise in session.sortedExercises {
+            newCache[sessionExercise.id] = computePreviousSets(for: sessionExercise)
+        }
+        previousSetsCache = newCache
+    }
+
+    private func computePreviousSets(for sessionExercise: SessionExercise) -> [Int: String] {
         guard let exercise = sessionExercise.exercise else { return [:] }
         let exerciseID = exercise.id
         let predicate = #Predicate<SessionExercise> {
@@ -309,11 +318,11 @@ struct ActiveWorkoutView: View {
 
     private func swapExercise(_ sessionExercise: SessionExercise, with newExercise: Exercise) {
         sessionExercise.exercise = newExercise
-        // Reset uncompleted sets
         for set in sessionExercise.sets where !set.isCompleted {
             set.weight = 0
             set.reps = 0
         }
+        refreshPreviousSets()
     }
 
     private func finishWorkout() {
@@ -321,32 +330,6 @@ struct ActiveWorkoutView: View {
         showSummary = true
     }
 
-    // MARK: - Timer
-
-    private func startTimer() {
-        let start = session.startedAt
-        elapsedSeconds = Int(Date().timeIntervalSince(start))
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            Task { @MainActor in
-                elapsedSeconds = Int(Date().timeIntervalSince(start))
-            }
-        }
-    }
-
-    private func stopTimer() {
-        timer?.invalidate()
-        timer = nil
-    }
-
-    private var formattedElapsed: String {
-        let hours = elapsedSeconds / 3600
-        let minutes = (elapsedSeconds % 3600) / 60
-        let secs = elapsedSeconds % 60
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, secs)
-        }
-        return String(format: "%d:%02d", minutes, secs)
-    }
 }
 
 // MARK: - Exercise Log Card
@@ -516,6 +499,7 @@ struct SetLogRow: View {
     @State private var rowFlash = false
     @State private var completionTrigger = false
     @State private var uncheckTrigger = false
+    @State private var completionAnimationStep: Int = 0
     @State private var swipeOffset: CGFloat = 0
     @State private var showDeleteButton = false
 
@@ -539,6 +523,21 @@ struct SetLogRow: View {
         .onChange(of: sessionSet.weight) { _, newWeight in
             if focusedField != .weight {
                 weightText = newWeight > 0 ? formatWeight(newWeight) : ""
+            }
+        }
+        .task(id: completionAnimationStep) {
+            guard completionAnimationStep > 0 else { return }
+
+            try? await Task.sleep(for: .milliseconds(50))
+            guard !Task.isCancelled else { return }
+            withAnimation(Animation.liftBounce(reduceMotion: reduceMotion)) {
+                checkmarkScale = 1.0
+            }
+
+            try? await Task.sleep(for: .milliseconds(550))
+            guard !Task.isCancelled, rowFlash else { return }
+            withAnimation(Animation.liftEaseOut(duration: 0.3, reduceMotion: reduceMotion)) {
+                rowFlash = false
             }
         }
     }
@@ -762,18 +761,10 @@ struct SetLogRow: View {
             withAnimation(Animation.liftBounce(reduceMotion: reduceMotion)) {
                 checkmarkScale = 0.5
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                withAnimation(Animation.liftBounce(reduceMotion: reduceMotion)) {
-                    checkmarkScale = 1.0
-                }
-            }
-
             withAnimation(Animation.liftEaseOut(duration: 0.1, reduceMotion: reduceMotion)) { rowFlash = true }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                withAnimation(Animation.liftEaseOut(duration: 0.3, reduceMotion: reduceMotion)) { rowFlash = false }
-            }
-
             withAnimation(Animation.liftEaseOut(duration: 0.25, reduceMotion: reduceMotion)) { showRIR = true }
+
+            completionAnimationStep += 1
             onCompleted()
         }
     }
@@ -782,6 +773,47 @@ struct SetLogRow: View {
         w.truncatingRemainder(dividingBy: 1) == 0
             ? String(format: "%.0f", w)
             : String(format: "%.1f", w)
+    }
+}
+
+// MARK: - Timer Label
+
+struct TimerLabel: View {
+    let startedAt: Date
+
+    @State private var elapsedSeconds: Int = 0
+    @State private var timer: Timer?
+
+    var body: some View {
+        Text(formattedElapsed)
+            .font(.system(.title2, design: .monospaced, weight: .medium))
+            .foregroundStyle(.secondary)
+            .onAppear { startTimer() }
+            .onDisappear { stopTimer() }
+    }
+
+    private func startTimer() {
+        elapsedSeconds = Int(Date().timeIntervalSince(startedAt))
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            Task { @MainActor in
+                elapsedSeconds = Int(Date().timeIntervalSince(startedAt))
+            }
+        }
+    }
+
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
+
+    private var formattedElapsed: String {
+        let hours = elapsedSeconds / 3600
+        let minutes = (elapsedSeconds % 3600) / 60
+        let secs = elapsedSeconds % 60
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, secs)
+        }
+        return String(format: "%d:%02d", minutes, secs)
     }
 }
 
