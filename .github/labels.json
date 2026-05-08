@@ -4,6 +4,7 @@
   { "name": "type:enhancement", "color": "a2eeef", "description": "Improvement to something that already exists" },
   { "name": "type:tech-debt",   "color": "fbca04", "description": "Code quality / refactor with no user-visible change" },
   { "name": "type:chore",       "color": "c5def5", "description": "Tooling, dependencies, CI, docs" },
+  { "name": "type:fix",         "color": "e4e669", "description": "Targeted code fix — behavior correction that isn't a full bug report" },
 
   { "name": "priority:P0-now",     "color": "b60205", "description": "Drop everything. Prod broken or data at risk" },
   { "name": "priority:P1-soon",    "color": "d93f0b", "description": "Important, next up" },
@@ -17,6 +18,7 @@
   { "name": "area:rest-timer",      "color": "1d76db", "description": "Rest timer logic, notifications, Live Activity" },
   { "name": "area:data-model",      "color": "1d76db", "description": "SwiftData schema, migrations, persistence" },
   { "name": "area:ui-polish",       "color": "1d76db", "description": "Haptics, animations, theme, micro-interactions" },
+  { "name": "area:accessibility",   "color": "1d76db", "description": "VoiceOver, Dynamic Type, Reduce Motion, tap targets, WCAG compliance" },
   { "name": "area:onboarding",      "color": "1d76db", "description": "First-launch flow, empty states, Sign in with Apple" },
   { "name": "area:profile",         "color": "1d76db", "description": "Profile tab, settings, user preferences" },
   { "name": "area:ai-assistant",    "color": "1d76db", "description": "Claude-powered plan generation, substitutions" },
