@@ -201,7 +201,6 @@ struct ActiveWorkoutView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .background(.ultraThinMaterial)
     }
 
     // MARK: - Bottom Bar
