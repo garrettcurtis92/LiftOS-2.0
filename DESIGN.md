@@ -186,7 +186,7 @@ The palette is Apple's, used with discipline. There is one true accent (system b
 
 LiftOS is **flat by default** and uses **tonal layering** (Apple's `systemBackground` → `secondarySystemBackground` → `tertiarySystemBackground` ramp) for depth instead of literal shadows. A card on the Home screen sits on the page because its background is one tonal step lighter (in light mode) or darker (in dark mode) than the page beneath it — there is no `.shadow` on it.
 
-Material backgrounds (`.ultraThinMaterial`) are used sparingly: the auto-rest-timer toggle bar at the bottom of the active workout uses `.ultraThinMaterial` so it reads as floating chrome over scrolling content. This is the lone application of frosted material in the app and it's functional, not decorative.
+Material backgrounds (`.ultraThinMaterial`, `.regularMaterial`, etc.) are not used anywhere in the app. Frosted-glass surfaces are deliberately avoided as a decorative effect — the system handles its own chrome (nav bar background, modal sheet surface) using its own materials, and any custom view stays flat on the tonal ramp.
 
 Literal shadows appear in exactly one documented place: the rest-timer progress ring carries a colored glow shadow (`.shadow(color: accent.opacity(0.4), radius: 6)`) so the timer feels alive at a glance from across the gym. The shadow color shifts to orange in the last five seconds. If a future feature wants to use `.shadow`, it needs an equally specific functional reason.
 
@@ -196,7 +196,7 @@ Literal shadows appear in exactly one documented place: the rest-timer progress 
 
 **The Functional-Glow Rule.** The only legitimate uses of `.shadow` are (a) the rest-timer progress ring at rest and during urgency, and (b) any future moment where the shadow is doing real work (e.g. a Live Activity element that needs to lift off the lock screen). Decorative ambient shadows under cards are forbidden.
 
-**The Sheet-Material-Rule.** Modal sheets use the system's default surface — they sit on `tertiarySystemBackground` with `presentationCornerRadius(20)` and `presentationDragIndicator(.visible)`. No custom shadow under the sheet, no glassmorphic blur except `.ultraThinMaterial` on the auto-rest toggle bar, no decorative outline.
+**The Sheet-Material-Rule.** Modal sheets use the system's default surface — they sit on `tertiarySystemBackground` with `presentationCornerRadius(20)` and `presentationDragIndicator(.visible)`. No custom shadow under the sheet, no decorative `.ultraThinMaterial` or other frosted-glass background, no decorative outline. The system's own materials on system-managed chrome (nav bar, sheets) are fine; custom views stay flat.
 
 ## 5. Components
 
@@ -276,7 +276,7 @@ A full-screen overlay that fades in over the active workout when a set completes
 - **Don't** wrap a colored stripe down the side of a card or row (any `border-leading` greater than 1pt as a colored accent). Use full borders, background tints, or leading icons instead.
 - **Don't** build hero-metric cards: big number / tiny label / decorative gradient. That's the SaaS-dashboard cliché PRODUCT.md explicitly rejects.
 - **Don't** build identical-looking icon-heading-text card grids. Each card type should look like itself.
-- **Don't** use glassmorphism / `.ultraThinMaterial` decoratively. The one allowed use is the auto-rest toggle bar where it functions as floating chrome over scrolling content.
+- **Don't** use glassmorphism / `.ultraThinMaterial` / `.regularMaterial` anywhere as a custom decorative effect. The system applies its own materials to system-managed chrome (nav bar background, modal sheet surface) — that's enough. Custom views stay flat on the tonal ramp.
 - **Don't** congratulate the user on a light set. No coach voice, no streak guilt, no "you haven't trained in 3 days" notifications. (Per PRODUCT.md's Trust the User's Expertise principle.)
 - **Don't** hardcode font point sizes. The rest-timer 48pt monospaced display is the only documented exception. Everything else uses Dynamic Type scale (`.headline`, `.body`, etc.).
 - **Don't** use all-caps for body text or button labels. SF Pro is not a display font that wants caps. The only acceptable caps are short metadata labels (column headers like "SET" / "REPS") at `.caption.weight(.semibold)`.
