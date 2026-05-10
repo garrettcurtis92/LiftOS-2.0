@@ -82,7 +82,7 @@ struct ActiveWorkoutView: View {
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button("Cancel", role: .destructive) {
+                Button("Cancel") {
                     showDiscardConfirmation = true
                 }
                 .disabled(editMode.isEditing)
@@ -148,17 +148,17 @@ struct ActiveWorkoutView: View {
             let total = session.totalSets
             Text("You've completed \(completed) of \(total) sets. Save this workout?")
         }
-        .confirmationDialog("End Workout?", isPresented: $showDiscardConfirmation) {
-            Button("Discard Workout", role: .destructive) {
-                modelContext.delete(session)
+        .confirmationDialog("Leave Workout?", isPresented: $showDiscardConfirmation) {
+            Button("Save and Exit") {
                 dismiss()
             }
-            Button("Keep as In-Progress") {
+            Button("Discard", role: .destructive) {
+                modelContext.delete(session)
                 dismiss()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("You can resume this workout later or discard it.")
+            Text("Your progress is saved. Resume from Today when you're ready.")
         }
         .task {
             refreshPreviousSets()
